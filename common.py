@@ -26,6 +26,9 @@ import glob
 
 import cv2
 
+# Constants
+SPACE_TOKEN = '<space>'
+
 __all__ = (
     'DIGITS',
     'sigmoid',
@@ -39,7 +42,7 @@ DIGITS = "0123456789"
 
 
 CHARS = DIGITS
-LENGTH = 5
+LENGTH = 16
 TEST_SIZE = 200
 
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
@@ -66,6 +69,7 @@ def read_data_for_lstm_ctc(img_glob):
     for fname in sorted(glob.glob(img_glob)):
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         code = list(fname.split("/")[1].split("_")[1])
+
         yield im, list(code)
 
 def unzip(b):

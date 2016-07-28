@@ -23,22 +23,20 @@ except ImportError:
 from utils import maybe_download as maybe_download
 from utils import sparse_tuple_from as sparse_tuple_from
 
-# Constants
-SPACE_TOKEN = '<space>'
 SPACE_INDEX = 0
 FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
 
 # Some configs
 num_features = 64
 # Accounting the 0th indice +  space + blank label = 28 characters
-num_classes = ord('9') - ord('0') + 1 + 1
-
+num_classes = ord('9') - ord('0') + 1 + 1 + 1
+print(num_classes)
 # Hyper-parameters
-num_epochs = 200
-num_hidden = 50
+num_epochs = 1000
+num_hidden = 100
 num_layers = 1
 batch_size = 1
-initial_learning_rate = 1e-2
+initial_learning_rate = 0.01
 momentum = 0.9
 
 num_examples = 1
@@ -50,7 +48,7 @@ audio_filename = maybe_download('LDC93S1.wav', 93638)
 target_filename = maybe_download('LDC93S1.txt', 62)
 
 fs, audio = wav.read(audio_filename)
-
+"""
 inputs = mfcc(audio, samplerate=fs)
 
 # Tranform in 3D array
@@ -73,18 +71,20 @@ with open(target_filename, 'rb') as f:
 print(
     targets)  # ['she', '', 'had', '', 'your', '', 'dark', '', 'suit', '', 'in', '', 'greasy', '', 'wash', '', 'water', '', 'all', '', 'year']
 # Adding blank label
-targets = np.hstack([SPACE_TOKEN if x == '' else list(x) for x in targets])
+targets = np.hstack([common.SPACE_TOKEN if x == '' else list(x) for x in targets])
 print(targets)
 # Transform char into index
-targets = np.asarray([SPACE_INDEX if x == SPACE_TOKEN else ord(x) - FIRST_INDEX
+targets = np.asarray([SPACE_INDEX if x == common.SPACE_TOKEN else ord(x) - FIRST_INDEX
                       for x in targets])
-
+"""
 test_input, test_codes = unzip(list(read_data_for_lstm_ctc("test/*.png"))[:common.BATCH_SIZE])
 test_input = test_input.swapaxes(1, 2)
 train_inputs = test_input
-targets= np.asarray(test_codes[0])
+print("targets", test_codes)
+targets = np.asarray([SPACE_INDEX if x == common.SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in test_codes[0]])
 print(test_input.shape)
-print(targets)
+print("targets", targets)
+print("train_inputs.shape[1]", train_inputs.shape[1])
 # Creating sparse representation to feed the placeholder
 train_targets = sparse_tuple_from([targets])
 print(train_targets)
@@ -193,9 +193,9 @@ with tf.Session(graph=graph) as session:
     d = session.run(decoded[0], feed_dict=feed)
     str_decoded = ''.join([chr(x) for x in np.asarray(d[1]) + FIRST_INDEX])
     # Replacing blank label to none
-    str_decoded = str_decoded.replace(chr(ord('z') + 1), '')
+    str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
     # Replacing space label to space
-    str_decoded = str_decoded.replace(chr(ord('a') - 1), ' ')
+    str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
 
     print('Original:\n%s' % original)
     print('Decoded:\n%s' % str_decoded)
