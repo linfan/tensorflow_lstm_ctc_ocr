@@ -33,10 +33,10 @@ num_classes = ord('9') - ord('0') + 1 + 1 + 1
 print(num_classes)
 # Hyper-parameters
 num_epochs = 1000
-num_hidden = 100
+num_hidden = 64
 num_layers = 1
 batch_size = 1
-initial_learning_rate = 0.01
+initial_learning_rate = 0.001
 momentum = 0.9
 
 num_examples = 1
@@ -197,5 +197,5 @@ with tf.Session(graph=graph) as session:
     # Replacing space label to space
     str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
 
-    print('Original:\n%s' % original)
+    #print('Original:\n%s' % original)
     print('Decoded:\n%s' % str_decoded)
