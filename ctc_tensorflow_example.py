@@ -37,7 +37,7 @@ initial_learning_rate = 1e-2
 momentum = 0.9
 
 num_examples = 1
-num_batches_per_epoch = int(num_examples/batch_size)
+num_batches_per_epoch = int(num_examples / batch_size)
 
 # Loading the data
 
@@ -49,7 +49,7 @@ fs, audio = wav.read(audio_filename)
 inputs = mfcc(audio, samplerate=fs)
 # Tranform in 3D array
 train_inputs = np.asarray(inputs[np.newaxis, :])
-train_inputs = (train_inputs - np.mean(train_inputs))/np.std(train_inputs)
+train_inputs = (train_inputs - np.mean(train_inputs)) / np.std(train_inputs)
 train_seq_len = [train_inputs.shape[1]]
 
 # Readings targets
@@ -65,18 +65,16 @@ with open(target_filename, 'rb') as f:
 
 # Adding blank label
 targets = np.hstack([SPACE_TOKEN if x == '' else list(x) for x in targets])
-
+print(targets)
 # Transform char into index
 targets = np.asarray([SPACE_INDEX if x == SPACE_TOKEN else ord(x) - FIRST_INDEX
                       for x in targets])
-
+print(targets)
 # Creating sparse representation to feed the placeholder
 train_targets = sparse_tuple_from([targets])
 
 # We don't have a validation dataset :(
-val_inputs, val_targets, val_seq_len = train_inputs, train_targets, \
-                                       train_seq_len
-
+val_inputs, val_targets, val_seq_len = train_inputs, train_targets, train_seq_len
 
 # THE MAIN CODE!
 
@@ -150,20 +148,18 @@ with tf.Session(graph=graph) as session:
     # Initializate the weights and biases
     tf.initialize_all_variables().run()
 
-
     for curr_epoch in xrange(num_epochs):
         train_cost = train_ler = 0
         start = time.time()
 
         for batch in xrange(num_batches_per_epoch):
-
             feed = {inputs: train_inputs,
                     targets: train_targets,
                     seq_len: train_seq_len}
 
             batch_cost, _ = session.run([cost, optimizer], feed)
-            train_cost += batch_cost*batch_size
-            train_ler += session.run(acc, feed_dict=feed)*batch_size
+            train_cost += batch_cost * batch_size
+            train_ler += session.run(acc, feed_dict=feed) * batch_size
 
         train_cost /= num_examples
         train_ler /= num_examples
@@ -175,7 +171,7 @@ with tf.Session(graph=graph) as session:
         val_cost, val_ler = session.run([cost, acc], feed_dict=val_feed)
 
         log = "Epoch {}/{}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}"
-        print(log.format(curr_epoch+1, num_epochs, train_cost, train_ler,
+        print(log.format(curr_epoch + 1, num_epochs, train_cost, train_ler,
                          val_cost, val_ler, time.time() - start))
     # Decoding
     d = session.run(decoded[0], feed_dict=feed)
