@@ -264,3 +264,6 @@ octave-workspace
 *.wav
 *.phn
 *.txt
+.idea/
+*.png
+*.jpg

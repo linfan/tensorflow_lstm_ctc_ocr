@@ -11,6 +11,7 @@ import numpy as np
 url = 'https://catalog.ldc.upenn.edu/desc/addenda/'
 last_percent_reported = None
 
+
 def download_progress_hook(count, blockSize, totalSize):
     """A hook to report the progress of a download. This is mostly intended for
     users with slow internet connections. Reports every 1% change in download
@@ -43,9 +44,10 @@ def maybe_download(filename, expected_bytes, force=False):
         print('Found and verified', filename)
     else:
         raise Exception(
-                        'Failed to verify ' + filename + \
-                        '. Can you get to it with a browser?')
+            'Failed to verify ' + filename + \
+            '. Can you get to it with a browser?')
     return filename
+
 
 def sparse_tuple_from(sequences, dtype=np.int32):
     """Create a sparse representention of x.
@@ -58,11 +60,11 @@ def sparse_tuple_from(sequences, dtype=np.int32):
     values = []
 
     for n, seq in enumerate(sequences):
-        indices.extend(zip([n]*len(seq), xrange(len(seq))))
+        indices.extend(zip([n] * len(seq), xrange(len(seq))))
         values.extend(seq)
 
     indices = np.asarray(indices, dtype=np.int64)
     values = np.asarray(values, dtype=dtype)
-    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1]+1], dtype=np.int64)
+    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
 
     return indices, values, shape

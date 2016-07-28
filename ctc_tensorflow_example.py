@@ -1,4 +1,6 @@
-#  Compatibility imports
+#!/usr/bin/env python
+# encoding=utf-8
+# Compatibility imports
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -8,6 +10,9 @@ import time
 import tensorflow as tf
 import scipy.io.wavfile as wav
 import numpy as np
+
+import common
+from common import unzip, read_data_for_lstm_ctc
 
 try:
     from python_speech_features import mfcc
@@ -21,16 +26,16 @@ from utils import sparse_tuple_from as sparse_tuple_from
 # Constants
 SPACE_TOKEN = '<space>'
 SPACE_INDEX = 0
-FIRST_INDEX = ord('a') - 1  # 0 is reserved to space
+FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
 
 # Some configs
-num_features = 13
+num_features = 64
 # Accounting the 0th indice +  space + blank label = 28 characters
-num_classes = ord('z') - ord('a') + 1 + 1 + 1
+num_classes = ord('9') - ord('0') + 1 + 1
 
 # Hyper-parameters
 num_epochs = 200
-num_hidden = 50
+num_hidden = 200
 num_layers = 1
 batch_size = 1
 initial_learning_rate = 1e-2
@@ -47,10 +52,13 @@ target_filename = maybe_download('LDC93S1.txt', 62)
 fs, audio = wav.read(audio_filename)
 
 inputs = mfcc(audio, samplerate=fs)
+
 # Tranform in 3D array
-train_inputs = np.asarray(inputs[np.newaxis, :])
+train_inputs = np.asarray(inputs[np.newaxis, :])  # the shape of train_inputs is (1,291,13)
+print(train_inputs.shape)
 train_inputs = (train_inputs - np.mean(train_inputs)) / np.std(train_inputs)
-train_seq_len = [train_inputs.shape[1]]
+print(train_inputs.shape)
+train_seq_len = [train_inputs.shape[1]]  # 291
 
 # Readings targets
 with open(target_filename, 'rb') as f:
@@ -62,17 +70,25 @@ with open(target_filename, 'rb') as f:
         original = ' '.join(line.strip().lower().split(' ')[2:]).replace('.', '')
         targets = original.replace(' ', '  ')
         targets = targets.split(' ')
-
+print(
+    targets)  # ['she', '', 'had', '', 'your', '', 'dark', '', 'suit', '', 'in', '', 'greasy', '', 'wash', '', 'water', '', 'all', '', 'year']
 # Adding blank label
 targets = np.hstack([SPACE_TOKEN if x == '' else list(x) for x in targets])
 print(targets)
 # Transform char into index
 targets = np.asarray([SPACE_INDEX if x == SPACE_TOKEN else ord(x) - FIRST_INDEX
                       for x in targets])
+
+test_input, test_codes = unzip(list(read_data_for_lstm_ctc("test/*.png"))[:common.BATCH_SIZE])
+test_input = test_input.swapaxes(1, 2)
+train_inputs = test_input
+targets= np.asarray(test_codes[0])
+print(test_input.shape)
 print(targets)
 # Creating sparse representation to feed the placeholder
 train_targets = sparse_tuple_from([targets])
-
+print(train_targets)
+train_seq_len = [train_inputs.shape[1]]  # 200
 # We don't have a validation dataset :(
 val_inputs, val_targets, val_seq_len = train_inputs, train_targets, train_seq_len
 
