@@ -35,7 +35,7 @@ num_classes = ord('9') - ord('0') + 1 + 1
 
 # Hyper-parameters
 num_epochs = 200
-num_hidden = 200
+num_hidden = 50
 num_layers = 1
 batch_size = 1
 initial_learning_rate = 1e-2
