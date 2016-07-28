@@ -36,7 +36,7 @@ num_epochs = 1000
 num_hidden = 64
 num_layers = 1
 batch_size = 1
-initial_learning_rate = 0.001
+initial_learning_rate = 0.0001
 momentum = 0.9
 
 num_examples = 1
