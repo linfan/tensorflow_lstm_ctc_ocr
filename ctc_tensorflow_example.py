@@ -20,9 +20,10 @@ from utils import sparse_tuple_from as sparse_tuple_from
 num_classes = ord('9') - ord('0') + 1 + 1 + 1
 print("num_classes", num_classes)
 # Hyper-parameters
-num_epochs = 500
+num_epochs = 10000
 num_hidden = 128
 num_layers = 1
+
 
 # THE MAIN CODE!
 # load the training or test dataset from disk
@@ -55,8 +56,6 @@ with graph.as_default():
                                                common.DECAY_STEPS,
                                                common.LEARNING_RATE_DECAY_FACTOR,
                                                staircase=True)
-
-    # e.g: log filter bank or MFCC features
     # Has size [batch_size, max_stepsize, num_features], but the
     # batch_size and max_stepsize can vary along each step
     inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
@@ -114,7 +113,7 @@ with graph.as_default():
 
     # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
     # (it's slower but you'll get better results)
-    decoded, log_prob = tf.contrib.ctc.ctc_greedy_decoder(logits, seq_len)
+    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len)
 
     # Accuracy: label error rate
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32),
