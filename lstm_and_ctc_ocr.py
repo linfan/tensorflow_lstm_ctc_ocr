@@ -29,6 +29,7 @@ print("num_hidden:", num_hidden, "num_layers:", num_layers)
 
 train_inputs, train_targets, train_seq_len = get_data_set('train')
 test_inputs, test_targets, test_seq_len = get_data_set('test')
+print("Data loaded....")
 graph = tf.Graph()
 with graph.as_default():
     global_step = tf.Variable(0, trainable=False)
@@ -89,7 +90,7 @@ with graph.as_default():
     loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
     cost = tf.reduce_mean(loss)
 
-    optimizer = tf.train.MomentumOptimizer(learning_rate,
+    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,
                                            momentum=common.MOMENTUM).minimize(cost, global_step=global_step)
 
     # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
