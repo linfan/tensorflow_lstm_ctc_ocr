@@ -20,11 +20,10 @@ except ImportError:
     print("Failed to import python_speech_features.\n Try pip install python_speech_features.")
     raise ImportError
 
-from utils import maybe_download as maybe_download
 from utils import sparse_tuple_from as sparse_tuple_from
 
 # Some configs
-num_features = 64
+# num_features = 64
 # Accounting the 0th indice +  space + blank label = 28 characters
 num_classes = ord('9') - ord('0') + 1 + 1 + 1
 print(num_classes)
@@ -32,46 +31,7 @@ print(num_classes)
 num_epochs = 500
 num_hidden = 128
 num_layers = 1
-initial_learning_rate = 0.0001
-momentum = 0.9
 
-# num_examples = 1
-# num_batches_per_epoch = int(num_examples / batch_size)
-
-# Loading the data
-
-# audio_filename = maybe_download('LDC93S1.wav', 93638)
-# target_filename = maybe_download('LDC93S1.txt', 62)
-
-# fs, audio = wav.read(audio_filename)
-"""
-inputs = mfcc(audio, samplerate=fs)
-
-# Tranform in 3D array
-train_inputs = np.asarray(inputs[np.newaxis, :])  # the shape of train_inputs is (1,291,13)
-print(train_inputs.shape)
-train_inputs = (train_inputs - np.mean(train_inputs)) / np.std(train_inputs)
-print(train_inputs.shape)
-train_seq_len = [train_inputs.shape[1]]  # 291
-
-# Readings targets
-with open(target_filename, 'rb') as f:
-    for line in f.readlines():
-        if line[0] == ';':
-            continue
-
-        # Get only the words between [a-z] and replace period for none
-        original = ' '.join(line.strip().lower().split(' ')[2:]).replace('.', '')
-        targets = original.replace(' ', '  ')
-        targets = targets.split(' ')
-print(
-    targets)  # ['she', '', 'had', '', 'your', '', 'dark', '', 'suit', '', 'in', '', 'greasy', '', 'wash', '', 'water', '', 'all', '', 'year']
-# Adding blank label
-targets = np.hstack([common.SPACE_TOKEN if x == '' else list(x) for x in targets])
-print(targets)
-# Transform char into index
-targets = np.asarray([SPACE_INDEX if x == common.SPACE_TOKEN else ord(x) - FIRST_INDEX
-                      for x in targets])
 """
 train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("train/*.png")))
 train_inputs = train_inputs.swapaxes(1, 2)
@@ -88,15 +48,45 @@ train_seq_len = np.ones(train_inputs.shape[0]) * common.OUTPUT_SHAPE[1]
 print(train_seq_len.shape)
 # We don't have a validation dataset :(
 val_inputs, val_targets, val_seq_len = train_inputs, train_targets, train_seq_len
+"""
+
 
 # THE MAIN CODE!
+# load the training or test dataset from disk
+def get_data_set(dirname):
+    inputs, codes = unzip(list(read_data_for_lstm_ctc(dirname + "/*.png")))
+    inputs = inputs.swapaxes(1, 2)
+    # print('train_inputs.shape', train_inputs.shape)
+    # print("train_codes", train_codes)
+    targets = [np.asarray(i) for i in codes]
+    # print("targets", targets)
+    # print("train_inputs.shape[1]", train_inputs.shape[1])
+    # Creating sparse representation to feed the placeholder
+    # print("tttt", targets)
+    sparse_targets = sparse_tuple_from(targets)
+    # print(train_targets)
+    seq_len = np.ones(inputs.shape[0]) * common.OUTPUT_SHAPE[1]
+    # print(train_seq_len.shape)
+    # We don't have a validation dataset :(
+    return inputs, sparse_targets, seq_len
+
+
+train_inputs, train_targets, train_seq_len = get_data_set('train')
+test_inputs, test_targets, test_seq_len = get_data_set('test')
 
 graph = tf.Graph()
 with graph.as_default():
+    global_step = tf.Variable(0, trainable=False)
+    learning_rate = tf.train.exponential_decay(common.INITIAL_LEARNING_RATE,
+                                               global_step,
+                                               common.DECAY_STEPS,
+                                               common.LEARNING_RATE_DECAY_FACTOR,
+                                               staircase=True)
+
     # e.g: log filter bank or MFCC features
     # Has size [batch_size, max_stepsize, num_features], but the
     # batch_size and max_stepsize can vary along each step
-    inputs = tf.placeholder(tf.float32, [None, None, num_features])
+    inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
 
     # Here we use sparse_placeholder that will generate a
     # SparseTensor required by ctc_loss op.
@@ -146,8 +136,8 @@ with graph.as_default():
     loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
     cost = tf.reduce_mean(loss)
 
-    optimizer = tf.train.MomentumOptimizer(initial_learning_rate,
-                                           0.9).minimize(cost)
+    optimizer = tf.train.MomentumOptimizer(learning_rate,
+                                           momentum=common.MOMENTUM).minimize(cost, global_step=global_step)
 
     # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
     # (it's slower but you'll get better results)
@@ -160,6 +150,17 @@ with graph.as_default():
 with tf.Session(graph=graph) as session:
     # Initializate the weights and biases
     tf.initialize_all_variables().run()
+
+    """
+    def do_report():
+        fDict = {inputX: test_batchInputs, targetIxs: test_batchTargetIxs, targetVals: test_batchTargetVals,
+                 targetShape: test_batchTargetShape, seqLengths: test_batchSeqLengths}
+        l, pred, errR, steps, lr_rate, lmt = session.run(
+            [loss, predictions, errorRate, global_step, learning_rate, logitsMaxTest],
+            feed_dict=fDict)
+        print("step:", steps, "errorRate:", errorRate, "loss:", l, "lr_rate:", lr_rate, "lmt:", np.unique(lmt))
+        print(predictions)
+    """
 
     for curr_epoch in xrange(num_epochs):
         train_cost = train_ler = 0
@@ -177,9 +178,9 @@ with tf.Session(graph=graph) as session:
         train_cost /= common.TRAIN_SIZE
         train_ler /= common.TRAIN_SIZE
 
-        val_feed = {inputs: val_inputs,
-                    targets: val_targets,
-                    seq_len: val_seq_len}
+        val_feed = {inputs: train_inputs,
+                    targets: train_targets,
+                    seq_len: train_seq_len}
 
         val_cost, val_ler = session.run([cost, acc], feed_dict=val_feed)
 

@@ -37,7 +37,7 @@ __all__ = (
     'sigmoid',
     'softmax',
 )
-OUTPUT_SHAPE = (64, 253)
+OUTPUT_SHAPE = (64, 256)
 import numpy
 
 DIGITS = "0123456789"
@@ -58,6 +58,7 @@ MIN_LENGTH = 16  # min length of the sequence
 BATCH_SIZE = 64
 BATCHES = 10
 TRAIN_SIZE = BATCH_SIZE * BATCHES
+MOMENTUM = 0.9
 
 
 def softmax(a):
