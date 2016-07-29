@@ -25,7 +25,6 @@ num_hidden = 64
 num_layers = 1
 print("num_hidden:", num_hidden, "num_layers:", num_layers)
 
-
 # THE MAIN CODE!
 
 train_inputs, train_targets, train_seq_len = get_data_set('train')
@@ -73,7 +72,7 @@ with graph.as_default():
     # see https://www.tensorflow.org/versions/r0.9/api_docs/python/contrib.layers.html#initializers
     W = tf.Variable(tf.truncated_normal([num_hidden,
                                          num_classes],
-                                        stddev=0.1))
+                                        stddev=0.01))
     # Zero initialization
     # Tip: Is tf.zeros_initializer the same?
     b = tf.Variable(tf.constant(0., shape=[num_classes]))
@@ -100,10 +99,6 @@ with graph.as_default():
     # Accuracy: label error rate
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32),
                                           targets))
-
-
-
-
 
 with tf.Session(graph=graph) as session:
     # Initializate the weights and biases

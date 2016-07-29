@@ -99,7 +99,7 @@ def decode_a_seq(indexes, spars_tensor):
 
 
 def decode_sparse_tensor(sparse_tensor):
-    print(sparse_tensor)
+    #print(sparse_tensor)
     decoded_indexes = list()
     current_i = 0
     current_seq = []
