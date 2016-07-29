@@ -24,25 +24,6 @@ num_epochs = 500
 num_hidden = 128
 num_layers = 1
 
-"""
-train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("train/*.png")))
-train_inputs = train_inputs.swapaxes(1, 2)
-print('train_inputs.shape', train_inputs.shape)
-print("train_codes", train_codes)
-targets = [np.asarray(i) for i in train_codes]
-# print("targets", targets)
-print("train_inputs.shape[1]", train_inputs.shape[1])
-# Creating sparse representation to feed the placeholder
-print("tttt", targets)
-train_targets = sparse_tuple_from(targets)
-print(train_targets)
-train_seq_len = np.ones(train_inputs.shape[0]) * common.OUTPUT_SHAPE[1]
-print(train_seq_len.shape)
-# We don't have a validation dataset :(
-val_inputs, val_targets, val_seq_len = train_inputs, train_targets, train_seq_len
-"""
-
-
 # THE MAIN CODE!
 # load the training or test dataset from disk
 def get_data_set(dirname):
