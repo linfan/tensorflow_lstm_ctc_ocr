@@ -151,16 +151,15 @@ with tf.Session(graph=graph) as session:
     # Initializate the weights and biases
     tf.initialize_all_variables().run()
 
-    """
+
     def do_report():
-        fDict = {inputX: test_batchInputs, targetIxs: test_batchTargetIxs, targetVals: test_batchTargetVals,
-                 targetShape: test_batchTargetShape, seqLengths: test_batchSeqLengths}
-        l, pred, errR, steps, lr_rate, lmt = session.run(
-            [loss, predictions, errorRate, global_step, learning_rate, logitsMaxTest],
-            feed_dict=fDict)
-        print("step:", steps, "errorRate:", errorRate, "loss:", l, "lr_rate:", lr_rate, "lmt:", np.unique(lmt))
-        print(predictions)
-    """
+        feed = {inputs: test_inputs,
+                targets: test_targets,
+                seq_len: test_seq_len}
+        decoded_str, log_probs_accuracy = session.run([decoded, log_prob, acc], feed)
+        train_cost += batch_cost * common.BATCH_SIZE
+        train_ler += session.run(acc, feed_dict=feed) * common.BATCH_SIZE
+
 
     for curr_epoch in xrange(num_epochs):
         train_cost = train_ler = 0
@@ -182,11 +181,11 @@ with tf.Session(graph=graph) as session:
                     targets: train_targets,
                     seq_len: train_seq_len}
 
-        val_cost, val_ler = session.run([cost, acc], feed_dict=val_feed)
+        val_cost, val_ler, lr = session.run([cost, acc, learning_rate], feed_dict=val_feed)
 
-        log = "Epoch {}/{}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}"
+        log = "Epoch {}/{}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}, learning_rate= {}"
         print(log.format(curr_epoch + 1, num_epochs, train_cost, train_ler,
-                         val_cost, val_ler, time.time() - start))
+                         val_cost, val_ler, time.time() - start, lr))
     # Decoding
     d = session.run(decoded[0], feed_dict=feed)
     str_decoded = ''.join([chr(x) for x in np.asarray(d[1]) + common.FIRST_INDEX])
