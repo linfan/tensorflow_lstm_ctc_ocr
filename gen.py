@@ -44,12 +44,13 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 import common
+from common import OUTPUT_SHAPE
 
 # fonts = ["fonts/Farrington-7B-Qiqi.ttf", "fonts/Arial.ttf", "fonts/times.ttf"]
 fonts = ["fonts/times.ttf"]
 FONT_HEIGHT = 32  # Pixel size to which the chars are resized
 
-OUTPUT_SHAPE = (64, 200)
+
 
 CHARS = common.CHARS + " "
 
