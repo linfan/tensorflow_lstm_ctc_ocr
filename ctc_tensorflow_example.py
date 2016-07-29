@@ -13,7 +13,7 @@ import numpy as np
 import common
 from common import unzip, read_data_for_lstm_ctc
 
-from utils import sparse_tuple_from as sparse_tuple_from
+from utils import sparse_tuple_from as sparse_tuple_from, decode_sparse_tensor, get_data_set
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
@@ -21,33 +21,15 @@ num_classes = ord('9') - ord('0') + 1 + 1 + 1
 print("num_classes", num_classes)
 # Hyper-parameters
 num_epochs = 10000
-num_hidden = 128
+num_hidden = 32
 num_layers = 1
+print("num_hidden:", num_hidden, "num_layers:", num_layers)
 
 
 # THE MAIN CODE!
-# load the training or test dataset from disk
-def get_data_set(dirname):
-    inputs, codes = unzip(list(read_data_for_lstm_ctc(dirname + "/*.png")))
-    inputs = inputs.swapaxes(1, 2)
-    # print('train_inputs.shape', train_inputs.shape)
-    # print("train_codes", train_codes)
-    targets = [np.asarray(i) for i in codes]
-    # print("targets", targets)
-    # print("train_inputs.shape[1]", train_inputs.shape[1])
-    # Creating sparse representation to feed the placeholder
-    # print("tttt", targets)
-    sparse_targets = sparse_tuple_from(targets)
-    # print(train_targets)
-    seq_len = np.ones(inputs.shape[0]) * common.OUTPUT_SHAPE[1]
-    # print(train_seq_len.shape)
-    # We don't have a validation dataset :(
-    return inputs, sparse_targets, seq_len
-
 
 train_inputs, train_targets, train_seq_len = get_data_set('train')
 test_inputs, test_targets, test_seq_len = get_data_set('test')
-
 graph = tf.Graph()
 with graph.as_default():
     global_step = tf.Variable(0, trainable=False)
@@ -113,11 +95,15 @@ with graph.as_default():
 
     # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
     # (it's slower but you'll get better results)
-    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len)
+    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
 
     # Accuracy: label error rate
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32),
                                           targets))
+
+
+
+
 
 with tf.Session(graph=graph) as session:
     # Initializate the weights and biases
@@ -129,14 +115,7 @@ with tf.Session(graph=graph) as session:
                      targets: test_targets,
                      seq_len: test_seq_len}
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
-        # Decoding
-        # dd = session.run(decoded, feed_dict=feed)
-        str_decoded = ''.join([chr(x) for x in np.asarray(dd[1]) + common.FIRST_INDEX])
-        # Replacing blank label to none
-        str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
-        # Replacing space label to space
-        str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
-        print(str_decoded, accuracy)
+        print(decode_sparse_tensor(dd))
 
 
     for curr_epoch in xrange(num_epochs):
@@ -174,6 +153,5 @@ with tf.Session(graph=graph) as session:
     str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
     # Replacing space label to space
     str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
-
     # print('Original:\n%s' % original)
     print('Decoded:\n%s' % str_decoded)

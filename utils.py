@@ -8,6 +8,8 @@ import os
 import sys
 import numpy as np
 
+import common
+
 url = 'https://catalog.ldc.upenn.edu/desc/addenda/'
 last_percent_reported = None
 
@@ -68,3 +70,52 @@ def sparse_tuple_from(sequences, dtype=np.int32):
     shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
 
     return indices, values, shape
+# load the training or test dataset from disk
+def get_data_set(dirname):
+    inputs, codes = common.unzip(list(common.read_data_for_lstm_ctc(dirname + "/*.png")))
+    inputs = inputs.swapaxes(1, 2)
+    # print('train_inputs.shape', train_inputs.shape)
+    # print("train_codes", train_codes)
+    targets = [np.asarray(i) for i in codes]
+    # print("targets", targets)
+    # print("train_inputs.shape[1]", train_inputs.shape[1])
+    # Creating sparse representation to feed the placeholder
+    # print("tttt", targets)
+    sparse_targets = sparse_tuple_from(targets)
+    # print(train_targets)
+    seq_len = np.ones(inputs.shape[0]) * common.OUTPUT_SHAPE[1]
+    # print(train_seq_len.shape)
+    # We don't have a validation dataset :(
+    return inputs, sparse_targets, seq_len
+
+def decode_a_seq(indexes, spars_tensor):
+    str_decoded = ''.join([chr(spars_tensor[1][m] + common.FIRST_INDEX) for m in indexes])
+    # Replacing blank label to none
+    str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
+    # Replacing space label to space
+    str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
+    # print("ffffffff", str_decoded)
+    return str_decoded
+
+
+def decode_sparse_tensor(sparse_tensor):
+    print(sparse_tensor)
+    decoded_indexes = list()
+    current_i = 0
+    current_seq = []
+    for offset, i_and_index in enumerate(sparse_tensor[0]):
+        i = i_and_index[0]
+        if i != current_i:
+            decoded_indexes.append(current_seq)
+            current_i = i
+            current_seq = list()
+        current_seq.append(offset)
+    decoded_indexes.append(current_seq)
+    # print("mmmm", decoded_indexes)
+    result = []
+    for index in decoded_indexes:
+        result.append(decode_a_seq(index, sparse_tensor))
+    return result
+
+test_inputs, test_targets, test_seq_len = get_data_set('test')
+print(decode_sparse_tensor(test_targets))
