@@ -26,6 +26,7 @@ import glob
 
 import cv2
 import numpy as np
+
 # Constants
 SPACE_INDEX = 0
 FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
@@ -46,7 +47,7 @@ DIGITS = "0123456789"
 
 CHARS = DIGITS
 LENGTH = 6
-TEST_SIZE = 122
+TEST_SIZE = 200
 
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 0.001
@@ -55,10 +56,11 @@ DECAY_STEPS = 100
 # parameters for bdlstm ctc
 MAX_LENGTH = 20  # max length of the sequence
 MIN_LENGTH = 16  # min length of the sequence
-BATCH_SIZE = 1
+BATCH_SIZE = 64
 BATCHES = 10
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 MOMENTUM = 0.9
+REPORT_STEPS = 5
 
 
 def softmax(a):
@@ -87,10 +89,10 @@ def unzip(b):
     ys = numpy.array(ys)
     return xs, ys
 
+
 if __name__ == '__main__':
     train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test/*.png"))[:2])
     print train_codes
     print("train_codes", train_codes)
     targets = np.asarray(train_codes).flat[:]
     print targets
-

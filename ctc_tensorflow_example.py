@@ -8,25 +8,17 @@ from __future__ import print_function
 import time
 
 import tensorflow as tf
-import scipy.io.wavfile as wav
 import numpy as np
 
 import common
 from common import unzip, read_data_for_lstm_ctc
 
-try:
-    from python_speech_features import mfcc
-except ImportError:
-    print("Failed to import python_speech_features.\n Try pip install python_speech_features.")
-    raise ImportError
-
 from utils import sparse_tuple_from as sparse_tuple_from
 
 # Some configs
-# num_features = 64
 # Accounting the 0th indice +  space + blank label = 28 characters
 num_classes = ord('9') - ord('0') + 1 + 1 + 1
-print(num_classes)
+print("num_classes", num_classes)
 # Hyper-parameters
 num_epochs = 500
 num_hidden = 128
@@ -153,12 +145,18 @@ with tf.Session(graph=graph) as session:
 
 
     def do_report():
-        feed = {inputs: test_inputs,
-                targets: test_targets,
-                seq_len: test_seq_len}
-        decoded_str, log_probs_accuracy = session.run([decoded, log_prob, acc], feed)
-        train_cost += batch_cost * common.BATCH_SIZE
-        train_ler += session.run(acc, feed_dict=feed) * common.BATCH_SIZE
+        test_feed = {inputs: test_inputs,
+                     targets: test_targets,
+                     seq_len: test_seq_len}
+        dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
+        # Decoding
+        # dd = session.run(decoded, feed_dict=feed)
+        str_decoded = ''.join([chr(x) for x in np.asarray(dd[1]) + common.FIRST_INDEX])
+        # Replacing blank label to none
+        str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
+        # Replacing space label to space
+        str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
+        print(str_decoded, accuracy)
 
 
     for curr_epoch in xrange(num_epochs):
@@ -170,9 +168,11 @@ with tf.Session(graph=graph) as session:
                     targets: train_targets,
                     seq_len: train_seq_len}
 
-            batch_cost, _ = session.run([cost, optimizer], feed)
+            batch_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
             train_cost += batch_cost * common.BATCH_SIZE
-            train_ler += session.run(acc, feed_dict=feed) * common.BATCH_SIZE
+            if steps % common.REPORT_STEPS == 0:
+                do_report()
+                # train_ler += session.run(acc, feed_dict=feed) * common.BATCH_SIZE
 
         train_cost /= common.TRAIN_SIZE
         train_ler /= common.TRAIN_SIZE
@@ -181,11 +181,12 @@ with tf.Session(graph=graph) as session:
                     targets: train_targets,
                     seq_len: train_seq_len}
 
-        val_cost, val_ler, lr = session.run([cost, acc, learning_rate], feed_dict=val_feed)
+        val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
 
-        log = "Epoch {}/{}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}, learning_rate= {}"
-        print(log.format(curr_epoch + 1, num_epochs, train_cost, train_ler,
-                         val_cost, val_ler, time.time() - start, lr))
+        log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+        print(
+            log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start,
+                       lr))
     # Decoding
     d = session.run(decoded[0], feed_dict=feed)
     str_decoded = ''.join([chr(x) for x in np.asarray(d[1]) + common.FIRST_INDEX])
