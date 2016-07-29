@@ -51,7 +51,7 @@ TEST_SIZE = 200
 
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 0.0001
-DECAY_STEPS = 200
+DECAY_STEPS = 50
 
 # parameters for bdlstm ctc
 MAX_LENGTH = 20  # max length of the sequence

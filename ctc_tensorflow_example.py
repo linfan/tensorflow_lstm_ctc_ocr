@@ -21,7 +21,7 @@ num_classes = ord('9') - ord('0') + 1 + 1 + 1
 print("num_classes", num_classes)
 # Hyper-parameters
 num_epochs = 10000
-num_hidden = 32
+num_hidden = 64
 num_layers = 1
 print("num_hidden:", num_hidden, "num_layers:", num_layers)
 
