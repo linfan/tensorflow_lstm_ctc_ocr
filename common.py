@@ -50,7 +50,7 @@ LENGTH = 6
 TEST_SIZE = 200
 
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
-INITIAL_LEARNING_RATE = 0.0001
+INITIAL_LEARNING_RATE = 1e-2
 DECAY_STEPS = 100
 
 # parameters for bdlstm ctc
