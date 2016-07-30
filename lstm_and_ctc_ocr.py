@@ -119,6 +119,7 @@ with tf.Session(graph=graph) as session:
         start = time.time()
 
         for batch in xrange(common.BATCHES):
+            #print("ffffff")
             feed = {inputs: train_inputs,
                     targets: train_targets,
                     seq_len: train_seq_len}
