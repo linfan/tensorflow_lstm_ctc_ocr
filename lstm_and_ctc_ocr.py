@@ -73,7 +73,7 @@ with graph.as_default():
     # see https://www.tensorflow.org/versions/r0.9/api_docs/python/contrib.layers.html#initializers
     W = tf.Variable(tf.truncated_normal([num_hidden,
                                          num_classes],
-                                        stddev=0.01))
+                                        stddev=0.1))
     # Zero initialization
     # Tip: Is tf.zeros_initializer the same?
     b = tf.Variable(tf.constant(0., shape=[num_classes]))

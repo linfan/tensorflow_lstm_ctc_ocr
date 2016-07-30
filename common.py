@@ -38,7 +38,7 @@ __all__ = (
     'sigmoid',
     'softmax',
 )
-OUTPUT_SHAPE = (64, 256)
+OUTPUT_SHAPE = (64, 128)
 import numpy
 
 DIGITS = "0123456789"
@@ -56,7 +56,7 @@ DECAY_STEPS = 100
 # parameters for bdlstm ctc
 MAX_LENGTH = 20  # max length of the sequence
 MIN_LENGTH = 16  # min length of the sequence
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 BATCHES = 100
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 MOMENTUM = 0.9
