@@ -23,6 +23,7 @@ Definitions that don't fit elsewhere.
 
 """
 import glob
+import numpy
 
 import cv2
 import numpy as np
@@ -38,8 +39,7 @@ __all__ = (
     'sigmoid',
     'softmax',
 )
-OUTPUT_SHAPE = (64, 128)
-import numpy
+OUTPUT_SHAPE = (64, 256)
 
 DIGITS = "0123456789"
 # LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -47,18 +47,19 @@ DIGITS = "0123456789"
 
 CHARS = DIGITS
 LENGTH = 16
-TEST_SIZE = 100
+LENGTHS = [16, 20]
+TEST_SIZE = 10
 
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
-DECAY_STEPS = 1000
+DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
-MAX_LENGTH = 20  # max length of the sequence
-MIN_LENGTH = 16  # min length of the sequence
-BATCH_SIZE = 1
+BATCH_SIZE = 2
 BATCHES = 1
+
 TRAIN_SIZE = BATCH_SIZE * BATCHES
+
 MOMENTUM = 0.9
 REPORT_STEPS = 5
 
@@ -91,7 +92,7 @@ def load_data_set(dirname):
     fname_list = glob.glob(dirname + "/*.png")
     result = dict()
     for fname in sorted(fname_list):
-        print "loading",fname
+        print "loading", fname
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         code = list(fname.split("/")[1].split("_")[1])
         result[fname] = (im, code)

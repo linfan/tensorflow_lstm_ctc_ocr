@@ -8,7 +8,6 @@ from __future__ import print_function
 import time
 
 import tensorflow as tf
-import numpy as np
 
 import common, model
 import utils
@@ -32,6 +31,23 @@ print("Data loaded....")
 
 
 # graph = tf.Graph()
+def report_accuracy(decoded_list, test_targets):
+    original_list = decode_sparse_tensor(test_targets)
+    detected_list = decode_sparse_tensor(decoded_list)
+    true_numer = 0
+    #print(detected_list)
+    if len(original_list) != len(detected_list):
+        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+              " test and detect length desn't match")
+        return
+    print("T/F: original(length) <-------> detectcted(length)")
+    for idx, number in enumerate(original_list):
+        detect_number = detected_list[idx]
+        hit = (number == detect_number)
+        print(hit, number, "(", len(number), ") <-------> ", detect_number, "(", len(detect_number), ")")
+        if hit:
+            true_numer = true_numer + 1
+    print("Test Accuracy:", true_numer * 1.0 / len(test_targets))
 
 
 def train():
@@ -64,7 +80,8 @@ def train():
                      targets: test_targets,
                      seq_len: test_seq_len}
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
-        print(decode_sparse_tensor(dd))
+        report_accuracy(dd, test_targets)
+        # decoded_list = decode_sparse_tensor(dd)
 
     def do_batch():
         feed = {inputs: train_inputs, targets: train_targets, seq_len: train_seq_len}
@@ -72,16 +89,16 @@ def train():
         if steps > 0 and steps % common.REPORT_STEPS == 0:
             do_report()
             save_path = saver.save(session, "model/ocr.model." + str(steps))
-            #print(save_path)
+            # print(save_path)
         return b_cost
 
     with tf.Session() as session:
         session.run(init)
         saver = tf.train.Saver(tf.all_variables())
         for curr_epoch in xrange(num_epochs):
-           # variables = tf.all_variables()
-           # for i in variables:
-           #     print(i.name)
+            # variables = tf.all_variables()
+            # for i in variables:
+            #     print(i.name)
 
             print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
@@ -92,7 +109,7 @@ def train():
                 c = do_batch()
                 train_cost += c * common.BATCH_SIZE
                 seconds = time.time() - start
-                print("Batch seconds:", seconds)
+                # print("Batch seconds:", seconds)
 
             train_cost /= common.TRAIN_SIZE
             # train_ler /= common.TRAIN_SIZE

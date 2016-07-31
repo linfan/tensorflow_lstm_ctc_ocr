@@ -46,11 +46,9 @@ from PIL import ImageFont
 import common
 from common import OUTPUT_SHAPE
 
-# fonts = ["fonts/Farrington-7B-Qiqi.ttf", "fonts/Arial.ttf", "fonts/times.ttf"]
-fonts = ["fonts/times.ttf"]
+fonts = ["fonts/Farrington-7B-Qiqi.ttf", "fonts/Arial.ttf", "fonts/times.ttf"]
+#fonts = ["fonts/times.ttf"]
 FONT_HEIGHT = 32  # Pixel size to which the chars are resized
-
-
 
 CHARS = common.CHARS + " "
 
@@ -161,10 +159,10 @@ def make_affine_transform(from_shape, to_shape,
 def generate_code():
     f = ""
     append_blank = random.choice([True, False])
-
-    for i in range(common.LENGTH):
-        #if 0 == i % 4 and append_blank:
-        #    f = f + ' '
+    length = random.choice(common.LENGTHS)
+    for i in range(length):
+        if 0 == i % 4 and append_blank:
+            f = f + ' '
         f = f + random.choice(common.DIGITS)
     return f
 

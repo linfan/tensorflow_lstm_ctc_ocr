@@ -274,3 +274,4 @@ ocr.model.meta
 test/
 train/
 model/
+validate/
