@@ -54,6 +54,7 @@ LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
+
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
 BATCHES = 2000
