@@ -35,7 +35,7 @@ def report_accuracy(decoded_list, test_targets):
     original_list = decode_sparse_tensor(test_targets)
     detected_list = decode_sparse_tensor(decoded_list)
     true_numer = 0
-    #print(detected_list)
+    # print(detected_list)
     if len(original_list) != len(detected_list):
         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
               " test and detect length desn't match")
@@ -88,7 +88,7 @@ def train():
         b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
         if steps > 0 and steps % common.REPORT_STEPS == 0:
             do_report()
-            save_path = saver.save(session, "model/ocr.model." + str(steps))
+            save_path = saver.save(session, "model/ocr.model", global_step=steps,max_to_keep=100)
             # print(save_path)
         return b_cost
 
