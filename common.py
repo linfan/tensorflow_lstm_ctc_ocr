@@ -64,7 +64,7 @@ MOMENTUM = 0.9
 REPORT_STEPS = 500
 
 # Hyper-parameters
-num_epochs = 10000
+num_epochs = 200
 num_hidden = 64
 num_layers = 1
 
