@@ -10,7 +10,7 @@ import time
 import tensorflow as tf
 import numpy as np
 
-import common
+import common, model
 from common import unzip, read_data_for_lstm_ctc
 
 from utils import sparse_tuple_from as sparse_tuple_from, decode_sparse_tensor, get_data_set
@@ -31,61 +31,16 @@ train_inputs, train_targets, train_seq_len = get_data_set('train')
 test_inputs, test_targets, test_seq_len = get_data_set('test')
 print("Data loaded....")
 graph = tf.Graph()
-with graph.as_default():
+
+
+def train():
     global_step = tf.Variable(0, trainable=False)
     learning_rate = tf.train.exponential_decay(common.INITIAL_LEARNING_RATE,
                                                global_step,
                                                common.DECAY_STEPS,
                                                common.LEARNING_RATE_DECAY_FACTOR,
                                                staircase=True)
-    # Has size [batch_size, max_stepsize, num_features], but the
-    # batch_size and max_stepsize can vary along each step
-    inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
-
-    # Here we use sparse_placeholder that will generate a
-    # SparseTensor required by ctc_loss op.
-    targets = tf.sparse_placeholder(tf.int32)
-
-    # 1d array of size [batch_size]
-    seq_len = tf.placeholder(tf.int32, [None])
-
-    # Defining the cell
-    # Can be:
-    #   tf.nn.rnn_cell.RNNCell
-    #   tf.nn.rnn_cell.GRUCell
-    cell = tf.nn.rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
-
-    # Stacking rnn cells
-    stack = tf.nn.rnn_cell.MultiRNNCell([cell] * num_layers,
-                                        state_is_tuple=True)
-
-    # The second output is the last state and we will no use that
-    outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)
-
-    shape = tf.shape(inputs)
-    batch_s, max_timesteps = shape[0], shape[1]
-
-    # Reshaping to apply the same weights over the timesteps
-    outputs = tf.reshape(outputs, [-1, num_hidden])
-
-    # Truncated normal with mean 0 and stdev=0.1
-    # Tip: Try another initialization
-    # see https://www.tensorflow.org/versions/r0.9/api_docs/python/contrib.layers.html#initializers
-    W = tf.Variable(tf.truncated_normal([num_hidden,
-                                         num_classes],
-                                        stddev=0.1))
-    # Zero initialization
-    # Tip: Is tf.zeros_initializer the same?
-    b = tf.Variable(tf.constant(0., shape=[num_classes]))
-
-    # Doing the affine projection
-    logits = tf.matmul(outputs, W) + b
-
-    # Reshaping back to the original shape
-    logits = tf.reshape(logits, [batch_s, -1, num_classes])
-
-    # Time major
-    logits = tf.transpose(logits, (1, 0, 2))
+    logits, inputs, targets, seq_len = model.get_train_model()
 
     loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
     cost = tf.reduce_mean(loss)
@@ -98,15 +53,10 @@ with graph.as_default():
     decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
 
     # Accuracy: label error rate
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32),
-                                          targets))
+    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), targets))
 
-
-with tf.Session(graph=graph) as session:
     # Initializate the weights and biases
-    tf.initialize_all_variables().run()
-    saver = tf.train.Saver()
-
+    init = tf.initialize_all_variables()
 
     def do_report():
         test_feed = {inputs: test_inputs,
@@ -115,24 +65,25 @@ with tf.Session(graph=graph) as session:
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
         print(decode_sparse_tensor(dd))
 
-
-    for curr_epoch in xrange(num_epochs):
-        train_cost = train_ler = 0
+    def do_batch():
         start = time.time()
+        feed = {inputs: train_inputs, targets: train_targets, seq_len: train_seq_len}
+        batch_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
 
-        for batch in xrange(common.BATCHES):
-            # print("ffffff")
-            feed = {inputs: train_inputs,
-                    targets: train_targets,
-                    seq_len: train_seq_len}
+    with tf.Session(graph=graph) as session:
+        session.run(init)
+        saver = tf.train.Saver()
+        for curr_epoch in xrange(num_epochs):
+            train_cost = train_ler = 0
+
+            for batch in xrange(common.BATCHES):
+                do_batch(batch)
 
             batch_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
             train_cost += batch_cost * common.BATCH_SIZE
             if steps > 0 and steps % common.REPORT_STEPS == 0:
                 do_report()
                 save_path = saver.save(session, "ocr.model")
-
-                # train_ler += session.run(acc, feed_dict=feed) * common.BATCH_SIZE
 
         train_cost /= common.TRAIN_SIZE
         train_ler /= common.TRAIN_SIZE

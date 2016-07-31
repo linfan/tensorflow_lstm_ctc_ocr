@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # encoding=utf-8
-#Created by andy on 2016-07-31 16:57.
+# Created by andy on 2016-07-31 16:57.
 import common
 
 __author__ = "andy"
 import tensorflow as tf
 
-def get_the_model():
+
+def get_train_model():
     # Has size [batch_size, max_stepsize, num_features], but the
     # batch_size and max_stepsize can vary along each step
     inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
@@ -56,18 +57,4 @@ def get_the_model():
     # Time major
     logits = tf.transpose(logits, (1, 0, 2))
 
-    return logits
-
-    loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
-    cost = tf.reduce_mean(loss)
-
-    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,
-                                           momentum=common.MOMENTUM).minimize(cost, global_step=global_step)
-
-    # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
-    # (it's slower but you'll get better results)
-    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
-
-    # Accuracy: label error rate
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32),
-                                          targets))
+    return logits, inputs, targets, seq_len
