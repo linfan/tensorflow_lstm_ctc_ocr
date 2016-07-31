@@ -57,12 +57,12 @@ DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
-BATCHES = 100
+BATCHES = 10000
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 50
+REPORT_STEPS = 500
 
 # Hyper-parameters
 num_epochs = 200
