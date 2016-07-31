@@ -267,3 +267,9 @@ octave-workspace
 .idea/
 *.png
 *.jpg
+bgs/
+checkpoint
+ocr.model
+ocr.model.meta
+test/
+train/

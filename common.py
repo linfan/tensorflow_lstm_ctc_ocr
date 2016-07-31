@@ -60,7 +60,16 @@ BATCH_SIZE = 16
 BATCHES = 100
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 MOMENTUM = 0.9
-REPORT_STEPS = 50
+REPORT_STEPS = 5
+
+# Hyper-parameters
+num_epochs = 10000
+num_hidden = 64
+num_layers = 1
+
+# Some configs
+# Accounting the 0th indice +  space + blank label = 28 characters
+num_classes = ord('9') - ord('0') + 1 + 1 + 1
 
 
 def softmax(a):

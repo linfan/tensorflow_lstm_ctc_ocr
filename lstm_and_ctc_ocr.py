@@ -101,9 +101,11 @@ with graph.as_default():
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32),
                                           targets))
 
+
 with tf.Session(graph=graph) as session:
     # Initializate the weights and biases
     tf.initialize_all_variables().run()
+    saver = tf.train.Saver()
 
 
     def do_report():
@@ -119,15 +121,17 @@ with tf.Session(graph=graph) as session:
         start = time.time()
 
         for batch in xrange(common.BATCHES):
-            #print("ffffff")
+            # print("ffffff")
             feed = {inputs: train_inputs,
                     targets: train_targets,
                     seq_len: train_seq_len}
 
             batch_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
             train_cost += batch_cost * common.BATCH_SIZE
-            if steps % common.REPORT_STEPS == 0:
+            if steps > 0 and steps % common.REPORT_STEPS == 0:
                 do_report()
+                save_path = saver.save(session, "ocr.model")
+
                 # train_ler += session.run(acc, feed_dict=feed) * common.BATCH_SIZE
 
         train_cost /= common.TRAIN_SIZE
