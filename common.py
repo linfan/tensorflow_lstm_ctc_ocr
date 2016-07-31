@@ -46,17 +46,17 @@ DIGITS = "0123456789"
 
 
 CHARS = DIGITS
-LENGTH = 6
+LENGTH = 16
 TEST_SIZE = 100
 
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
-INITIAL_LEARNING_RATE = 1e-2
-DECAY_STEPS = 100
+INITIAL_LEARNING_RATE = 1e-3
+DECAY_STEPS = 1000
 
 # parameters for bdlstm ctc
 MAX_LENGTH = 20  # max length of the sequence
 MIN_LENGTH = 16  # min length of the sequence
-BATCH_SIZE = 10
+BATCH_SIZE = 16
 BATCHES = 100
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 MOMENTUM = 0.9
