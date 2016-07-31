@@ -62,7 +62,7 @@ BATCHES = 100
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 500
+REPORT_STEPS = 50
 
 # Hyper-parameters
 num_epochs = 200

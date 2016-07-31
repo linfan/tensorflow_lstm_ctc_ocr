@@ -88,13 +88,13 @@ def train():
         b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
         if steps > 0 and steps % common.REPORT_STEPS == 0:
             do_report()
-            save_path = saver.save(session, "model/ocr.model", global_step=steps, max_to_keep=100)
+            save_path = saver.save(session, "model/ocr.model", global_step=steps)
             # print(save_path)
         return b_cost
 
     with tf.Session() as session:
         session.run(init)
-        saver = tf.train.Saver(tf.all_variables())
+        saver = tf.train.Saver(tf.all_variables(), max_to_keep=100)
         for curr_epoch in xrange(num_epochs):
             # variables = tf.all_variables()
             # for i in variables:
