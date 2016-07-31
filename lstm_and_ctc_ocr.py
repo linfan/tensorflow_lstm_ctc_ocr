@@ -41,7 +41,7 @@ def train():
                                                common.DECAY_STEPS,
                                                common.LEARNING_RATE_DECAY_FACTOR,
                                                staircase=True)
-    logits, inputs, targets, seq_len = model.get_train_model()
+    logits, inputs, targets, seq_len, W, b = model.get_train_model()
 
     loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
     cost = tf.reduce_mean(loss)
@@ -71,14 +71,18 @@ def train():
         b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
         if steps > 0 and steps % common.REPORT_STEPS == 0:
             do_report()
-            save_path = saver.save(session, "model/ocr.model." + str(time.time()))
-            print(save_path)
+            save_path = saver.save(session, "model/ocr.model." + str(steps))
+            #print(save_path)
         return b_cost
 
     with tf.Session() as session:
         session.run(init)
-        saver = tf.train.Saver()
+        saver = tf.train.Saver(tf.all_variables())
         for curr_epoch in xrange(num_epochs):
+           # variables = tf.all_variables()
+           # for i in variables:
+           #     print(i.name)
+
             print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
             for batch in xrange(common.BATCHES):
@@ -91,7 +95,7 @@ def train():
                 print("Batch seconds:", seconds)
 
             train_cost /= common.TRAIN_SIZE
-            #train_ler /= common.TRAIN_SIZE
+            # train_ler /= common.TRAIN_SIZE
 
             val_feed = {inputs: train_inputs,
                         targets: train_targets,

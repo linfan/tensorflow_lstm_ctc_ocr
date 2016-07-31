@@ -43,10 +43,10 @@ def get_train_model():
     # see https://www.tensorflow.org/versions/r0.9/api_docs/python/contrib.layers.html#initializers
     W = tf.Variable(tf.truncated_normal([common.num_hidden,
                                          common.num_classes],
-                                        stddev=0.1))
+                                        stddev=0.1), name="W")
     # Zero initialization
     # Tip: Is tf.zeros_initializer the same?
-    b = tf.Variable(tf.constant(0., shape=[common.num_classes]))
+    b = tf.Variable(tf.constant(0., shape=[common.num_classes]), name="b")
 
     # Doing the affine projection
     logits = tf.matmul(outputs, W) + b
@@ -57,4 +57,4 @@ def get_train_model():
     # Time major
     logits = tf.transpose(logits, (1, 0, 2))
 
-    return logits, inputs, targets, seq_len
+    return logits, inputs, targets, seq_len, W, b
