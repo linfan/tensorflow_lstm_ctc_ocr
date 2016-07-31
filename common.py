@@ -56,8 +56,8 @@ DECAY_STEPS = 1000
 # parameters for bdlstm ctc
 MAX_LENGTH = 20  # max length of the sequence
 MIN_LENGTH = 16  # min length of the sequence
-BATCH_SIZE = 16
-BATCHES = 100
+BATCH_SIZE = 1
+BATCHES = 1
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 MOMENTUM = 0.9
 REPORT_STEPS = 5
@@ -81,10 +81,38 @@ def sigmoid(a):
     return 1. / (1. + numpy.exp(-a))
 
 
-def read_data_for_lstm_ctc(img_glob):
-    for fname in sorted(glob.glob(img_glob)):
+"""
+    {"dirname":{"fname":(im,code)}}
+"""
+data_set = {}
+
+
+def load_data_set(dirname):
+    fname_list = glob.glob(dirname + "/*.png")
+    result = dict()
+    for fname in sorted(fname_list):
+        print "loading",fname
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         code = list(fname.split("/")[1].split("_")[1])
+        result[fname] = (im, code)
+    data_set[dirname] = result
+
+
+def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
+    fname_list = []
+    if not data_set.has_key(dirname):
+        load_data_set(dirname)
+
+    if start_index is None:
+        fname_list = glob.glob(dirname + "/*.png")
+    else:
+        for i in range(start_index, end_index):
+            fname_list.extend(glob.glob(dirname + "/{:08d}_*.png".format(i)))
+
+    for fname in sorted(fname_list):
+        # im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
+        # code = list(fname.split("/")[1].split("_")[1])
+        im, code = data_set.get(dirname).get(fname)
         yield im, numpy.asarray([SPACE_INDEX if x == SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in list(code)])
 
 
@@ -100,8 +128,12 @@ def unzip(b):
 
 
 if __name__ == '__main__':
+    """
     train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test/*.png"))[:2])
     print train_codes
     print("train_codes", train_codes)
     targets = np.asarray(train_codes).flat[:]
     print targets
+    """
+    load_data_set("test")
+    print data_set

@@ -11,9 +11,9 @@ import tensorflow as tf
 import numpy as np
 
 import common, model
-from common import unzip, read_data_for_lstm_ctc
+import utils
 
-from utils import sparse_tuple_from as sparse_tuple_from, decode_sparse_tensor, get_data_set
+from utils import decode_sparse_tensor
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
@@ -27,10 +27,11 @@ print("num_hidden:", num_hidden, "num_layers:", num_layers)
 
 # THE MAIN CODE!
 
-train_inputs, train_targets, train_seq_len = get_data_set('train')
-test_inputs, test_targets, test_seq_len = get_data_set('test')
+test_inputs, test_targets, test_seq_len = utils.get_data_set('test')
 print("Data loaded....")
-graph = tf.Graph()
+
+
+# graph = tf.Graph()
 
 
 def train():
@@ -66,44 +67,42 @@ def train():
         print(decode_sparse_tensor(dd))
 
     def do_batch():
-        start = time.time()
         feed = {inputs: train_inputs, targets: train_targets, seq_len: train_seq_len}
-        batch_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
+        b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
+        if steps > 0 and steps % common.REPORT_STEPS == 0:
+            do_report()
+            save_path = saver.save(session, "model/ocr.model." + str(time.time()))
+            print(save_path)
+        return b_cost
 
-    with tf.Session(graph=graph) as session:
+    with tf.Session() as session:
         session.run(init)
         saver = tf.train.Saver()
         for curr_epoch in xrange(num_epochs):
+            print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
-
             for batch in xrange(common.BATCHES):
-                do_batch(batch)
+                train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch,
+                                                                                (batch + 1) * common.BATCH_SIZE)
+                start = time.time()
+                c = do_batch()
+                train_cost += c * common.BATCH_SIZE
+                seconds = time.time() - start
+                print("Batch seconds:", seconds)
 
-            batch_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
-            train_cost += batch_cost * common.BATCH_SIZE
-            if steps > 0 and steps % common.REPORT_STEPS == 0:
-                do_report()
-                save_path = saver.save(session, "ocr.model")
+            train_cost /= common.TRAIN_SIZE
+            #train_ler /= common.TRAIN_SIZE
 
-        train_cost /= common.TRAIN_SIZE
-        train_ler /= common.TRAIN_SIZE
+            val_feed = {inputs: train_inputs,
+                        targets: train_targets,
+                        seq_len: train_seq_len}
 
-        val_feed = {inputs: train_inputs,
-                    targets: train_targets,
-                    seq_len: train_seq_len}
+            val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
 
-        val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
+            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+            print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler,
+                             time.time() - start, lr))
 
-        log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
-        print(
-            log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start,
-                       lr))
-    # Decoding
-    d = session.run(decoded[0], feed_dict=feed)
-    str_decoded = ''.join([chr(x) for x in np.asarray(d[1]) + common.FIRST_INDEX])
-    # Replacing blank label to none
-    str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
-    # Replacing space label to space
-    str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
-    # print('Original:\n%s' % original)
-    print('Decoded:\n%s' % str_decoded)
+
+if __name__ == '__main__':
+    train()

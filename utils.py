@@ -70,9 +70,11 @@ def sparse_tuple_from(sequences, dtype=np.int32):
     shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
 
     return indices, values, shape
+
+
 # load the training or test dataset from disk
-def get_data_set(dirname):
-    inputs, codes = common.unzip(list(common.read_data_for_lstm_ctc(dirname + "/*.png")))
+def get_data_set(dirname, start_index=None, end_index=None):
+    inputs, codes = common.unzip(list(common.read_data_for_lstm_ctc(dirname, start_index, end_index)))
     inputs = inputs.swapaxes(1, 2)
     # print('train_inputs.shape', train_inputs.shape)
     # print("train_codes", train_codes)
@@ -88,6 +90,7 @@ def get_data_set(dirname):
     # We don't have a validation dataset :(
     return inputs, sparse_targets, seq_len
 
+
 def decode_a_seq(indexes, spars_tensor):
     str_decoded = ''.join([chr(spars_tensor[1][m] + common.FIRST_INDEX) for m in indexes])
     # Replacing blank label to none
@@ -99,7 +102,7 @@ def decode_a_seq(indexes, spars_tensor):
 
 
 def decode_sparse_tensor(sparse_tensor):
-    #print(sparse_tensor)
+    # print(sparse_tensor)
     decoded_indexes = list()
     current_i = 0
     current_seq = []
@@ -117,5 +120,3 @@ def decode_sparse_tensor(sparse_tensor):
         result.append(decode_a_seq(index, sparse_tensor))
     return result
 
-test_inputs, test_targets, test_seq_len = get_data_set('test')
-print(decode_sparse_tensor(test_targets))
