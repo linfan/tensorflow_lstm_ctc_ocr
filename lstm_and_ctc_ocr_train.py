@@ -90,7 +90,7 @@ def train():
             do_report()
             save_path = saver.save(session, "model/ocr.model", global_step=steps)
             # print(save_path)
-        return b_cost
+        return b_cost, steps
 
     with tf.Session() as session:
         session.run(init)
@@ -106,12 +106,12 @@ def train():
                 start = time.time()
                 train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch,
                                                                                 (batch + 1) * common.BATCH_SIZE)
-                print("get data time",time.time() - start )
+                # print("get data time",time.time() - start )
                 start = time.time()
-                c = do_batch()
+                c, steps = do_batch()
                 train_cost += c * common.BATCH_SIZE
                 seconds = time.time() - start
-                print("Batch seconds:", seconds)
+                print("Step:", steps, ", batch seconds:", seconds)
 
             train_cost /= common.TRAIN_SIZE
             # train_ler /= common.TRAIN_SIZE
