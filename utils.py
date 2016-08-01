@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import time
 from six.moves.urllib.request import urlretrieve
 
 import os
@@ -74,7 +75,9 @@ def sparse_tuple_from(sequences, dtype=np.int32):
 
 # load the training or test dataset from disk
 def get_data_set(dirname, start_index=None, end_index=None):
+    #start = time.time()
     inputs, codes = common.unzip(list(common.read_data_for_lstm_ctc(dirname, start_index, end_index)))
+    #print("unzip time",time.time() - start )
     inputs = inputs.swapaxes(1, 2)
     # print('train_inputs.shape', train_inputs.shape)
     # print("train_codes", train_codes)

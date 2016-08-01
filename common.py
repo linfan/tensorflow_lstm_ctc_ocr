@@ -29,6 +29,8 @@ import cv2
 import numpy as np
 
 # Constants
+import time
+
 SPACE_INDEX = 0
 FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
 
@@ -54,15 +56,14 @@ LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
-
 # parameters for bdlstm ctc
-BATCH_SIZE = 64
-BATCHES = 10000
+BATCH_SIZE = 16
+BATCHES = 400
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 500
+REPORT_STEPS = 50
 
 # Hyper-parameters
 num_epochs = 200
@@ -96,26 +97,35 @@ def load_data_set(dirname):
         print "loading", fname
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         code = list(fname.split("/")[1].split("_")[1])
-        result[fname] = (im, code)
+        index = fname.split("/")[1].split("_")[0]
+        result[index] = (im, code)
     data_set[dirname] = result
 
 
 def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
+    start = time.time()
     fname_list = []
     if not data_set.has_key(dirname):
         load_data_set(dirname)
 
     if start_index is None:
-        fname_list = glob.glob(dirname + "/*.png")
+        f_list = glob.glob(dirname + "/*.png")
+        fname_list = [fname.split("/")[1].split("_")[0] for fname in f_list]
+
     else:
         for i in range(start_index, end_index):
-            fname_list.extend(glob.glob(dirname + "/{:08d}_*.png".format(i)))
-
+            fname_index = "{:08d}".format(i)
+            #print(fname_index)
+            fname_list.append(fname_index)
+    #print("regrex time ", time.time() - start)
+    start = time.time()
+    dir_data_set = data_set.get(dirname)
     for fname in sorted(fname_list):
         # im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         # code = list(fname.split("/")[1].split("_")[1])
-        im, code = data_set.get(dirname).get(fname)
+        im, code = dir_data_set.get(fname)
         yield im, numpy.asarray([SPACE_INDEX if x == SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in list(code)])
+    #print("get time ", time.time() - start)
 
 
 def convert_original_code_train_code(code):
@@ -137,5 +147,4 @@ if __name__ == '__main__':
     targets = np.asarray(train_codes).flat[:]
     print targets
     """
-    load_data_set("test")
-    print data_set
+    print list(read_data_for_lstm_ctc("test", 0, 10))

@@ -103,13 +103,15 @@ def train():
             print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
             for batch in xrange(common.BATCHES):
+                start = time.time()
                 train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch,
                                                                                 (batch + 1) * common.BATCH_SIZE)
+                print("get data time",time.time() - start )
                 start = time.time()
                 c = do_batch()
                 train_cost += c * common.BATCH_SIZE
                 seconds = time.time() - start
-                # print("Batch seconds:", seconds)
+                print("Batch seconds:", seconds)
 
             train_cost /= common.TRAIN_SIZE
             # train_ler /= common.TRAIN_SIZE
