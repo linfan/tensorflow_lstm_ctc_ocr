@@ -47,7 +47,7 @@ def report_accuracy(decoded_list, test_targets):
         print(hit, number, "(", len(number), ") <-------> ", detect_number, "(", len(detect_number), ")")
         if hit:
             true_numer = true_numer + 1
-    print("Test Accuracy:", true_numer * 1.0 / len(test_targets))
+    print("Test Accuracy:", true_numer * 1.0 / len(original_list))
 
 
 def train():
