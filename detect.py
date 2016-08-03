@@ -30,4 +30,4 @@ def detect(test_inputs, test_targets, test_seq_len):
 if __name__ == '__main__':
     test_inputs, test_targets, test_seq_len = utils.get_data_set('validate')
     print detect(test_inputs, test_targets, test_seq_len)
-    # print_tensors_in_checkpoint_file("model/ocr.model.50", None)
+    print_tensors_in_checkpoint_file("model/ocr.model.50", None)
