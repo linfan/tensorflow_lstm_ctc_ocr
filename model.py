@@ -77,9 +77,9 @@ def convolutional_layers():
 def get_train_model():
     # Has size [batch_size, max_stepsize, num_features], but the
     # batch_size and max_stepsize can vary along each step
-    features = convolutional_layers()
-    print tf.shape(features)
-    # inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
+    #features = convolutional_layers()
+    #print features.get_shape()
+    inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
 
     # Here we use sparse_placeholder that will generate a
     # SparseTensor required by ctc_loss op.
@@ -99,9 +99,9 @@ def get_train_model():
                                         state_is_tuple=True)
 
     # The second output is the last state and we will no use that
-    outputs, _ = tf.nn.dynamic_rnn(cell, features, seq_len, dtype=tf.float32)
+    outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)
 
-    shape = tf.shape(features)
+    shape = tf.shape(inputs)
     batch_s, max_timesteps = shape[0], shape[1]
 
     # Reshaping to apply the same weights over the timesteps
@@ -126,4 +126,4 @@ def get_train_model():
     # Time major
     logits = tf.transpose(logits, (1, 0, 2))
 
-    return logits, features, targets, seq_len, W, b
+    return logits, inputs, targets, seq_len, W, b

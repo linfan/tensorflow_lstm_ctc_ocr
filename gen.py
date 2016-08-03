@@ -270,7 +270,7 @@ def generate_ims(num_images):
     """
     variation = 1.0
     char_ims = get_all_font_char_ims(FONT_HEIGHT)
-    num_bg_images = len(os.listdir("bgs"))
+    num_bg_images = len(os.listdir("bgs")) - 2
     for i in range(num_images):
         yield generate_im(random.choice(char_ims), num_bg_images)
 
@@ -284,5 +284,5 @@ if __name__ == "__main__":
         im_gen = generate_ims(size.get(dir_name))
         for img_idx, (im, c, p) in enumerate(im_gen):
             fname = dir_name + "/{:08d}_{}_{}.png".format(img_idx, c, "1" if p else "0")
-            print '\''+fname+'\','
+            print '\'' + fname + '\','
             cv2.imwrite(fname, im * 255.)
