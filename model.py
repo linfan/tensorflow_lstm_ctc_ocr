@@ -38,12 +38,13 @@ def convolutional_layers():
     Get the convolutional layers of the model.
 
     """
-    x = tf.placeholder(tf.float32, [None, None, None])
+
+    inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
 
     # First layer
     W_conv1 = weight_variable([5, 5, 1, 48])
     b_conv1 = bias_variable([48])
-    x_expanded = tf.expand_dims(x, 3)
+    x_expanded = tf.expand_dims(inputs, 3)
     h_conv1 = tf.nn.relu(conv2d(x_expanded, W_conv1) + b_conv1)
     h_pool1 = max_pool(h_conv1, ksize=(2, 2), stride=(2, 2))
 
@@ -61,15 +62,24 @@ def convolutional_layers():
     h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
     h_pool3 = max_pool(h_conv3, ksize=(2, 2), stride=(2, 2))
 
-    return x, h_pool3, [W_conv1, b_conv1,
-                        W_conv2, b_conv2,
-                        W_conv3, b_conv3]
+    # Densely connected layer
+    W_fc1 = weight_variable([32 * 8 * common.OUTPUT_SHAPE[1], common.OUTPUT_SHAPE[1]])
+    b_fc1 = bias_variable([common.OUTPUT_SHAPE[1]])
+
+    conv_layer_flat = tf.reshape(h_pool3, [-1, 32 * 8 * common.OUTPUT_SHAPE[1]])
+
+    features = tf.nn.relu(tf.matmul(conv_layer_flat, W_fc1) + b_fc1)
+    shape = tf.shape(features)
+    features = tf.reshape(features, [shape[0], common.OUTPUT_SHAPE[1], 1])  # batchsize * outputshape * 1
+    return features
 
 
 def get_train_model():
     # Has size [batch_size, max_stepsize, num_features], but the
     # batch_size and max_stepsize can vary along each step
-    inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
+    features = convolutional_layers()
+    print tf.shape(features)
+    # inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
 
     # Here we use sparse_placeholder that will generate a
     # SparseTensor required by ctc_loss op.
@@ -89,9 +99,9 @@ def get_train_model():
                                         state_is_tuple=True)
 
     # The second output is the last state and we will no use that
-    outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)
+    outputs, _ = tf.nn.dynamic_rnn(cell, features, seq_len, dtype=tf.float32)
 
-    shape = tf.shape(inputs)
+    shape = tf.shape(features)
     batch_s, max_timesteps = shape[0], shape[1]
 
     # Reshaping to apply the same weights over the timesteps
@@ -116,4 +126,4 @@ def get_train_model():
     # Time major
     logits = tf.transpose(logits, (1, 0, 2))
 
-    return logits, inputs, targets, seq_len, W, b
+    return logits, features, targets, seq_len, W, b
