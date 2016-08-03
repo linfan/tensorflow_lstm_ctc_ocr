@@ -62,7 +62,8 @@ def train():
     loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
     cost = tf.reduce_mean(loss)
 
-    optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate).minimize(cost, global_step=global_step)
+    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,
+                                           momentum=common.MOMENTUM).minimize(cost, global_step=global_step)
 
     # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
     # (it's slower but you'll get better results)
@@ -81,6 +82,7 @@ def train():
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
         report_accuracy(dd, test_targets)
         # decoded_list = decode_sparse_tensor(dd)
+
     def do_batch():
         feed = {inputs: train_inputs, targets: train_targets, seq_len: train_seq_len}
         b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)

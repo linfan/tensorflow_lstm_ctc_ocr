@@ -85,7 +85,8 @@ def get_train_model():
     cell = tf.nn.rnn_cell.LSTMCell(common.num_hidden, state_is_tuple=True)
 
     # Stacking rnn cells
-    stack = tf.nn.rnn_cell.MultiRNNCell([cell] * common.num_layers, state_is_tuple=True)
+    stack = tf.nn.rnn_cell.MultiRNNCell([cell] * common.num_layers,
+                                        state_is_tuple=True)
 
     # The second output is the last state and we will no use that
     outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)
