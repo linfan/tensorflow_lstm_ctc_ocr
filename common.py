@@ -41,6 +41,7 @@ __all__ = (
     'sigmoid',
     'softmax',
 )
+
 OUTPUT_SHAPE = (64, 256)
 
 DIGITS = "0123456789"
@@ -58,7 +59,7 @@ DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
-BATCHES = 5
+BATCHES = 2000
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
