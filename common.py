@@ -73,7 +73,9 @@ num_layers = 1
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
-num_classes = ord('9') - ord('0') + 1 + 1 + 1
+# num_classes = ord('9') - ord('0') + 1 + 1 + 1
+num_classes = len(DIGITS) + 1 + 1  # 10 digits + blank + ctc blank
+print num_classes
 
 
 def softmax(a):
