@@ -59,7 +59,7 @@ DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
-BATCHES = 4000
+BATCHES = 2000
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
