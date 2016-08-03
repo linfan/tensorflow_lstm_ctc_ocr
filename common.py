@@ -64,12 +64,12 @@ BATCHES = 2000
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 500
+REPORT_STEPS = 100
 
 # Hyper-parameters
 num_epochs = 200
 num_hidden = 64
-num_layers = 1000
+num_layers = 1
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
