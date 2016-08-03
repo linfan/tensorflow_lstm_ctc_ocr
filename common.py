@@ -50,7 +50,7 @@ DIGITS = "0123456789"
 
 CHARS = DIGITS
 LENGTH = 16
-LENGTHS = [16, 20]
+LENGTHS = [5, 6]
 TEST_SIZE = 200
 ADD_BLANK = True
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
@@ -64,12 +64,12 @@ BATCHES = 2000
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 100
+REPORT_STEPS = 500
 
 # Hyper-parameters
 num_epochs = 200
 num_hidden = 64
-num_layers = 1
+num_layers = 1000
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
@@ -116,9 +116,9 @@ def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
     else:
         for i in range(start_index, end_index):
             fname_index = "{:08d}".format(i)
-            #print(fname_index)
+            # print(fname_index)
             fname_list.append(fname_index)
-    #print("regrex time ", time.time() - start)
+    # print("regrex time ", time.time() - start)
     start = time.time()
     dir_data_set = data_set.get(dirname)
     for fname in sorted(fname_list):
@@ -126,7 +126,7 @@ def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
         # code = list(fname.split("/")[1].split("_")[1])
         im, code = dir_data_set.get(fname)
         yield im, numpy.asarray([SPACE_INDEX if x == SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in list(code)])
-    #print("get time ", time.time() - start)
+        # print("get time ", time.time() - start)
 
 
 def convert_original_code_train_code(code):
