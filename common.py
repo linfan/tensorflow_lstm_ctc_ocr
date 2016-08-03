@@ -50,15 +50,15 @@ DIGITS = "0123456789"
 CHARS = DIGITS
 LENGTH = 16
 LENGTHS = [16, 20]
-TEST_SIZE = 2
+TEST_SIZE = 1000
 ADD_BLANK = True
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
-BATCH_SIZE = 1
-BATCHES = 1
+BATCH_SIZE = 64
+BATCHES = 5
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
@@ -140,11 +140,10 @@ def unzip(b):
 
 
 if __name__ == '__main__':
-    """
-    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test/*.png"))[:2])
+    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
+    print train_inputs.shape
     print train_codes
     print("train_codes", train_codes)
     targets = np.asarray(train_codes).flat[:]
     print targets
-    """
     print list(read_data_for_lstm_ctc("test", 0, 10))

@@ -106,7 +106,8 @@ def train():
                 start = time.time()
                 train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch,
                                                                                 (batch + 1) * common.BATCH_SIZE)
-                # print("get data time",time.time() - start )
+
+                print("get data time",time.time() - start )
                 start = time.time()
                 c, steps = do_batch()
                 train_cost += c * common.BATCH_SIZE
