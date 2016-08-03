@@ -86,7 +86,7 @@ def train():
         b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
         if steps > 0 and steps % common.REPORT_STEPS == 0:
             do_report()
-            save_path = saver.save(session, "model/ocr.model", global_step=steps)
+            save_path = saver.save(session, "models/ocr.model", global_step=steps)
             # print(save_path)
         return b_cost, steps
 
@@ -102,9 +102,10 @@ def train():
             train_cost = train_ler = 0
             for batch in xrange(common.BATCHES):
                 start = time.time()
-                train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch,
+                train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch * common.BATCH_SIZE,
                                                                                 (batch + 1) * common.BATCH_SIZE)
-                # print("get data time",time.time() - start )
+
+                print("get data time", time.time() - start)
                 start = time.time()
                 c, steps = do_batch()
                 train_cost += c * common.BATCH_SIZE

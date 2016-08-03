@@ -79,6 +79,7 @@ def get_data_set(dirname, start_index=None, end_index=None):
     inputs, codes = common.unzip(list(common.read_data_for_lstm_ctc(dirname, start_index, end_index)))
     #print("unzip time",time.time() - start )
     inputs = inputs.swapaxes(1, 2)
+
     # print('train_inputs.shape', train_inputs.shape)
     # print("train_codes", train_codes)
     targets = [np.asarray(i) for i in codes]
