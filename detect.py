@@ -14,12 +14,13 @@ __author__ = "andy"
 
 def detect(test_inputs, test_targets, test_seq_len):
     logits, inputs, targets, seq_len, W, b = model.get_train_model()
-    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
-    saver = tf.train.Saver()
 
+    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
+
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         # Restore variables from disk.
-        saver.restore(sess, "models/ocr.model.1035")
+        saver.restore(sess, "models/ocr.model-58300")
         print("Model restored.")
         #feed_dict = {inputs: test_inputs, targets: test_targets, seq_len: test_seq_len}
         feed_dict = {inputs: test_inputs, seq_len: test_seq_len}
@@ -28,6 +29,6 @@ def detect(test_inputs, test_targets, test_seq_len):
 
 
 if __name__ == '__main__':
-    test_inputs, test_targets, test_seq_len = utils.get_data_set('validate')
+    test_inputs, test_targets, test_seq_len = utils.get_data_set('test')
     print detect(test_inputs, test_targets, test_seq_len)
-    print_tensors_in_checkpoint_file("model/ocr.model.50", None)
+   # print_tensors_in_checkpoint_file("model/ocr.model.50", None)

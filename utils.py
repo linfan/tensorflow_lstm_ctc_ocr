@@ -118,7 +118,6 @@ def decode_sparse_tensor(sparse_tensor):
             current_seq = list()
         current_seq.append(offset)
     decoded_indexes.append(current_seq)
-    # print("mmmm", decoded_indexes)
     result = []
     for index in decoded_indexes:
         result.append(decode_a_seq(index, sparse_tensor))
