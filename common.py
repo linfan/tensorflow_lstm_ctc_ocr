@@ -34,7 +34,7 @@ import time
 SPACE_INDEX = 0
 FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
 
-SPACE_TOKEN = 'x'
+SPACE_TOKEN = 'x'  # x means space
 
 __all__ = (
     'DIGITS',
