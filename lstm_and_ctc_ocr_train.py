@@ -16,8 +16,8 @@ from utils import decode_sparse_tensor
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
-num_classes = ord('9') - ord('0') + 1 + 1 + 1
-print("num_classes", num_classes)
+#num_classes = ord('9') - ord('0') + 1 + 1 + 1
+#print("num_classes", num_classes)
 # Hyper-parameters
 num_epochs = 10000
 num_hidden = 64
@@ -47,7 +47,9 @@ def report_accuracy(decoded_list, test_targets):
         print(hit, number, "(", len(number), ") <-------> ", detect_number, "(", len(detect_number), ")")
         if hit:
             true_numer = true_numer + 1
-    print("Test Accuracy:", true_numer * 1.0 / len(original_list))
+    accuraccy = true_numer * 1.0 / len(original_list)
+    print("Test Accuracy:", accuraccy)
+    return accuraccy
 
 
 def train():
@@ -80,7 +82,8 @@ def train():
                      targets: test_targets,
                      seq_len: test_seq_len}
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
-        report_accuracy(dd, test_targets)
+        accuracy = report_accuracy(dd, test_targets)
+        save_path = saver.save(session, "models/ocr.model-" + str(accuracy), global_step=steps)
         # decoded_list = decode_sparse_tensor(dd)
 
     def do_batch():
@@ -88,7 +91,6 @@ def train():
         b_cost, steps, _ = session.run([cost, global_step, optimizer], feed)
         if steps > 0 and steps % common.REPORT_STEPS == 0:
             do_report()
-            save_path = saver.save(session, "models/ocr.model", global_step=steps)
             # print(save_path)
         return b_cost, steps
 

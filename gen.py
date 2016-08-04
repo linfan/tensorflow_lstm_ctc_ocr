@@ -165,7 +165,7 @@ def generate_code():
         blank = ' '
 
     for i in range(length):
-        if 0 == i % 4 and append_blank:
+        if 0 == i % 4 and append_blank and i > 0:  # do not add blank as the first digit
             f = f + blank
         f = f + random.choice(common.DIGITS)
     return f
@@ -213,7 +213,7 @@ def generate_plate(font_height, char_ims):
     plate = (numpy.ones(out_shape) * plate_color * (1. - text_mask) +
              numpy.ones(out_shape) * text_color * text_mask)
 
-    return plate, rounded_rect(out_shape, radius), code.replace(" ", "")
+    return plate, rounded_rect(out_shape, radius), code.replace(" ", common.SPACE_TOKEN)  #  means blank
 
 
 def generate_bg(num_bg_images):
@@ -268,7 +268,6 @@ def generate_ims(num_images):
         Iterable of number plate images.
 
     """
-    variation = 1.0
     char_ims = get_all_font_char_ims(FONT_HEIGHT)
     num_bg_images = len(os.listdir("bgs")) - 2
     for i in range(num_images):
