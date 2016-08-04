@@ -269,11 +269,9 @@ octave-workspace
 *.jpg
 bgs/
 checkpoint
-ocr.model
-ocr.model.meta
 test/
 train/
 validate/
 *.meta
 ocr.model*
-models/
+models/*
