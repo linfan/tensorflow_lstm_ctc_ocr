@@ -49,17 +49,17 @@ DIGITS = "0123456789"
 
 
 CHARS = DIGITS
-LENGTH = 16
-LENGTHS = [5, 6]
-TEST_SIZE = 5
+# LENGTH = 16
+LENGTHS = [16, 20]
+TEST_SIZE = 10000
 ADD_BLANK = True
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
-BATCH_SIZE = 1
-BATCHES = 1
+BATCH_SIZE = 128
+BATCHES = 2000
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
@@ -67,7 +67,7 @@ MOMENTUM = 0.9
 REPORT_STEPS = 100
 
 # Hyper-parameters
-num_epochs = 200
+num_epochs = 2000
 num_hidden = 64
 num_layers = 1
 
@@ -141,8 +141,7 @@ def unzip(b):
     ys = numpy.array(ys)
     return xs, ys
 
-
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
 #    print train_inputs.shape
 #    print train_codes
