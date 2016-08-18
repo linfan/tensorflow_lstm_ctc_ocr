@@ -189,7 +189,7 @@ def rounded_rect(shape, radius):
 def generate_plate(font_height, char_ims):
     h_padding = random.uniform(0.2, 0.4) * font_height
     v_padding = random.uniform(0.1, 0.3) * font_height
-    spacing = font_height * random.uniform(-0.01, 0.05)
+    spacing = font_height * random.uniform(0.01, 0.05)
     radius = 1 + int(font_height * 0.1 * random.random())
     code = generate_code()
     text_width = sum(char_ims[c].shape[1] for c in code)
@@ -210,10 +210,16 @@ def generate_plate(font_height, char_ims):
         text_mask[iy:iy + char_im.shape[0], ix:ix + char_im.shape[1]] = char_im
         x += char_im.shape[1] + spacing
 
-    plate = (numpy.ones(out_shape) * plate_color * (1. - text_mask) +
-             numpy.ones(out_shape) * text_color * text_mask)
+    plate = (  # numpy.ones(out_shape) * plate_color * (1. - text_mask) +
+        # numpy.ones(out_shape) *
+        # text_color *
+        text_mask)
 
-    return plate, rounded_rect(out_shape, radius), code.replace(" ", common.SPACE_TOKEN)  #  means blank
+    # print "fffff", plate.shape
+    # plate.resize([plate.shape[0] + 3, plate.shape[1]+1 ])
+    #cv2.imwrite("test/fff.png", plate * 255)
+
+    return plate, rounded_rect(out_shape, radius), code.replace(" ", common.SPACE_TOKEN)  # means blank
 
 
 def generate_bg(num_bg_images):
@@ -243,16 +249,19 @@ def generate_im(char_ims, num_bg_images):
         to_shape=bg.shape,
         min_scale=0.8,
         max_scale=0.9,
-        rotation_variation=0.3,
+        rotation_variation=0,
         scale_variation=1.0,
-        translation_variation=1.0)
+        translation_variation=0)
     plate = cv2.warpAffine(plate, M, (bg.shape[1], bg.shape[0]))
     plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
+    # plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
 
-    out = plate * plate_mask + bg * (1 - plate_mask)
+    # out = plate * plate_mask + bg * (1 - plate_mask)
+    out = plate + bg
+    # out = plate
     out = cv2.resize(out, (OUTPUT_SHAPE[1], OUTPUT_SHAPE[0]))
 
-    out += numpy.random.normal(scale=0.05, size=out.shape)
+    # out += numpy.random.normal(scale=0.05, size=out.shape)
     out = numpy.clip(out, 0., 1.)
     return out, code, not out_of_bounds
 
