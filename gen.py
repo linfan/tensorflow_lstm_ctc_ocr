@@ -251,7 +251,7 @@ def generate_im(char_ims, num_bg_images):
         max_scale=0.9,
         rotation_variation=0,
         scale_variation=1.0,
-        translation_variation=0)
+        translation_variation=1.0)
     plate = cv2.warpAffine(plate, M, (bg.shape[1], bg.shape[0]))
     plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
     # plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
