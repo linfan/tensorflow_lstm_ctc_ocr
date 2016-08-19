@@ -150,3 +150,4 @@ def unzip(b):
 #    targets = np.asarray(train_codes).flat[:]
 #    print targets
 #    print list(read_data_for_lstm_ctc("test", 0, 10))
+
