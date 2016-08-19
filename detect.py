@@ -20,7 +20,7 @@ def detect(test_inputs, test_targets, test_seq_len):
     saver = tf.train.Saver()
     with tf.Session() as sess:
         # Restore variables from disk.
-        saver.restore(sess, "models/ocr.model-71900")
+        saver.restore(sess, "models/ocr.model-0.5-56499")
         print("Model restored.")
         #feed_dict = {inputs: test_inputs, targets: test_targets, seq_len: test_seq_len}
         feed_dict = {inputs: test_inputs, seq_len: test_seq_len}

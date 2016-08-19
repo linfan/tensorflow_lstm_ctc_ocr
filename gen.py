@@ -98,11 +98,12 @@ def euler_to_mat(yaw, pitch, roll):
 
 def pick_colors():
     first = True
+    return random.random(),random.random()
     while first or plate_color - text_color < 0.3:
         text_color = random.random()
         plate_color = random.random()
-        if text_color > plate_color:
-            text_color, plate_color = plate_color, text_color
+        #if text_color > plate_color:
+        #    text_color, plate_color = plate_color, text_color
         first = False
     return text_color, plate_color
 
@@ -212,12 +213,11 @@ def generate_plate(font_height, char_ims):
 
     plate = (  # numpy.ones(out_shape) * plate_color * (1. - text_mask) +
         # numpy.ones(out_shape) *
-        # text_color *
-        text_mask)
+        text_color * text_mask)
 
     # print "fffff", plate.shape
     # plate.resize([plate.shape[0] + 3, plate.shape[1]+1 ])
-    #cv2.imwrite("test/fff.png", plate * 255)
+    # cv2.imwrite("test/fff.png", plate * 255)
 
     return plate, rounded_rect(out_shape, radius), code.replace(" ", common.SPACE_TOKEN)  # means blank
 
