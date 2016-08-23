@@ -1,12 +1,11 @@
-# CTC + Tensorflow Example
+# LSTM + CTC ocr
 
-A toy example showing how to get CTC cost function working with Tensorflow for automatic speech recognition.
+A toy example showing how to get CTC cost function working with Tensorflow for ocr problem.
 
 ## Requirements
 
 - Python 2.7+
 - Tensorflow 0.8+
-- python_speech_features
 - numpy
 - scipy
 
