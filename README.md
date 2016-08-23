@@ -1,6 +1,6 @@
 # LSTM + CTC ocr
 
-A toy example showing how to get CTC cost function working with Tensorflow for ocr problem.
+An example showing how to get CTC cost function working with Tensorflow for ocr problem.
 
 ## Requirements
 
