@@ -222,25 +222,28 @@ def generate_plate(font_height, char_ims):
     return plate, rounded_rect(out_shape, radius), code.replace(" ", common.SPACE_TOKEN)  # means blank
 
 
-def generate_bg(num_bg_images):
-    found = False
-    while not found:
-        fname = "bgs/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
-        # fname = "bgs/12345678.jpg"
-        bg = cv2.imread(fname, cv2.CV_LOAD_IMAGE_GRAYSCALE) / 255.
-        if (bg.shape[1] >= OUTPUT_SHAPE[1] and
-                    bg.shape[0] >= OUTPUT_SHAPE[0]):
-            found = True
-
+def generate_bg(bg_ims):
+    index = random.randint(0, len(bg_ims)-1)
+    bg = bg_ims[index]
     x = random.randint(0, bg.shape[1] - OUTPUT_SHAPE[1])
     y = random.randint(0, bg.shape[0] - OUTPUT_SHAPE[0])
     bg = bg[y:y + OUTPUT_SHAPE[0], x:x + OUTPUT_SHAPE[1]]
 
     return bg
+    
+def get_all_bg_ims(num_bg_images):
+    result = []
+    for i in range(0, num_bg_images):
+        fname = "bgs/{:08d}.jpg".format(i)
+        bg = cv2.imread(fname, 0) / 255.
+        if (bg.shape[1] < OUTPUT_SHAPE[1] or
+                    bg.shape[0] < OUTPUT_SHAPE[0]):
+            continue;
+        result.append(bg)
+    return result
 
-
-def generate_im(char_ims, num_bg_images):
-    bg = generate_bg(num_bg_images)
+def generate_im(char_ims, bg_ims):
+    bg = generate_bg(bg_ims)
 
     plate, plate_mask, code = generate_plate(FONT_HEIGHT, char_ims)
 
@@ -279,8 +282,9 @@ def generate_ims(num_images):
     """
     char_ims = get_all_font_char_ims(FONT_HEIGHT)
     num_bg_images = len(os.listdir("bgs")) - 2
+    bg_ims = get_all_bg_ims(num_bg_images)
     for i in range(num_images):
-        yield generate_im(random.choice(char_ims), num_bg_images)
+        yield generate_im(random.choice(char_ims), bg_ims)
 
 
 if __name__ == "__main__":
