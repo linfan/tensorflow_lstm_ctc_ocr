@@ -80,8 +80,8 @@ def get_data_set(dirname, start_index=None, end_index=None):
     #print("unzip time",time.time() - start )
     inputs = inputs.swapaxes(1, 2)
 
-    # print('train_inputs.shape', train_inputs.shape)
-    # print("train_codes", train_codes)
+    #print(dirname, ' inputs.shape', inputs.shape)
+    #print(dirname, " codes", codes)
     targets = [np.asarray(i) for i in codes]
     # print("targets", targets)
     # print("train_inputs.shape[1]", train_inputs.shape[1])
@@ -96,17 +96,20 @@ def get_data_set(dirname, start_index=None, end_index=None):
 
 
 def decode_a_seq(indexes, spars_tensor):
-    str_decoded = ''.join([chr(spars_tensor[1][m] + common.FIRST_INDEX) for m in indexes])
+    decoded = []
+    for m in indexes:
+        str = common.DIGITS[spars_tensor[1][m]]
+        decoded.append(str)
     # Replacing blank label to none
-    str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
+    #str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
     # Replacing space label to space
-    str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
+    #str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
     # print("ffffffff", str_decoded)
-    return str_decoded
+    return decoded
 
 
 def decode_sparse_tensor(sparse_tensor):
-    # print(sparse_tensor)
+    print("sparse_tensor = ", sparse_tensor)
     decoded_indexes = list()
     current_i = 0
     current_seq = []
@@ -118,8 +121,11 @@ def decode_sparse_tensor(sparse_tensor):
             current_seq = list()
         current_seq.append(offset)
     decoded_indexes.append(current_seq)
+    print("decoded_indexes = ", decoded_indexes)
     result = []
     for index in decoded_indexes:
+        #print("index = ", index)
         result.append(decode_a_seq(index, sparse_tensor))
+	#print(result)
     return result
 
