@@ -202,8 +202,9 @@ def generate_plate(font_height, char_ims):
     out_shape = (int(font_height + v_padding * 2),
                  int(text_width + h_padding * 2))
 
-    text_color, plate_color = pick_colors()
-
+    #text_color, plate_color = pick_colors()
+    text_color = 1
+    
     text_mask = numpy.zeros(out_shape)
 
     x = h_padding
