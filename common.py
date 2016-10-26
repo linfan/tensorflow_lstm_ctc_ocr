@@ -74,7 +74,7 @@ REPORT_STEPS = 1000
 
 # Hyper-parameters
 num_epochs = 2000
-num_hidden = 128
+num_hidden = 256
 num_layers = 1
 
 # Some configs
