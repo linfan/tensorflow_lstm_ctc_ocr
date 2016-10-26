@@ -61,7 +61,7 @@ def report_accuracy(decoded_list, test_targets):
 
 def train():
     test_inputs, test_targets, test_seq_len = utils.get_data_set('test')
-    global_step = tf.Variable(118000, trainable=False)
+    global_step = tf.Variable(0, trainable=False)
     learning_rate = tf.train.exponential_decay(common.INITIAL_LEARNING_RATE,
                                                global_step,
                                                common.DECAY_STEPS,
@@ -82,9 +82,8 @@ def train():
     # Accuracy: label error rate
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), targets))
 
-    # Initializate the weights and biases
-    #init = tf.initialize_all_variables()
-    saver = tf.train.Saver()
+
+
     def do_report():
         test_feed = {inputs: test_inputs,
                      targets: test_targets,
@@ -105,44 +104,48 @@ def train():
     with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as session:
         ckpt = tf.train.get_checkpoint_state("models")
         if ckpt and ckpt.model_checkpoint_path:
+            saver = tf.train.Saver()
             saver.restore(session, ckpt.model_checkpoint_path)
-            #session.run(init)
-            #saver = tf.train.Saver(tf.all_variables(), max_to_keep=100)
-            for curr_epoch in xrange(num_epochs):
-                # variables = tf.all_variables()
-                # for i in variables:
-                #     print(i.name)
-
-                print("Epoch.......", curr_epoch)
-                train_cost = train_ler = 0
-                for batch in xrange(common.BATCHES):
-                    start = time.time()
-                    train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch * common.BATCH_SIZE,
-                                                                                    (batch + 1) * common.BATCH_SIZE)
-
-                    print("get data time", time.time() - start)
-                    start = time.time()
-                    c, steps = do_batch()
-                    train_cost += c * common.BATCH_SIZE
-                    seconds = time.time() - start
-                    print("Step:", steps, ", batch seconds:", seconds)
-
-                train_cost /= common.TRAIN_SIZE
-                # train_ler /= common.TRAIN_SIZE
-
-                val_feed = {inputs: train_inputs,
-                            targets: train_targets,
-                            seq_len: train_seq_len}
-
-                val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
-
-                log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
-                print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler,
-                                 time.time() - start, lr))
         else:
             print("no checkpoint found")
+            # Initializate the weights and biases
+            init = tf.initialize_all_variables()
+            session.run(init)
+            saver = tf.train.Saver(tf.all_variables(), max_to_keep=100)
+        for curr_epoch in xrange(num_epochs):
+            # variables = tf.all_variables()
+            # for i in variables:
+            #     print(i.name)
+
+            print("Epoch.......", curr_epoch)
+            train_cost = train_ler = 0
+            for batch in xrange(common.BATCHES):
+                start = time.time()
+                train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch * common.BATCH_SIZE,
+                                                                                (batch + 1) * common.BATCH_SIZE)
+
+                print("get data time", time.time() - start)
+                start = time.time()
+                c, steps = do_batch()
+                train_cost += c * common.BATCH_SIZE
+                seconds = time.time() - start
+                print("Step:", steps, ", batch seconds:", seconds)
+
+            train_cost /= common.TRAIN_SIZE
+            # train_ler /= common.TRAIN_SIZE
+
+            val_feed = {inputs: train_inputs,
+                        targets: train_targets,
+                        seq_len: train_seq_len}
+
+            val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
+
+            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+            print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler,
+                             time.time() - start, lr))
+            
 
 if __name__ == '__main__':
-    #gen.gen_all()
+    gen.gen_all()
     # test_inputs, test_targets, test_seq_len = utils.get_data_set('test')
     train()
