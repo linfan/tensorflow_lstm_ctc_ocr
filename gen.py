@@ -171,7 +171,7 @@ def make_affine_transform(from_shape, to_shape,
 def generate_code():
     f = ""
     append_blank = random.choice([True, False])
-    length = random.choice(common.LENGTHS)
+    length = random.choice(range(0,21))
     blank = ''
     if common.ADD_BLANK:
         blank = ' '
@@ -179,7 +179,7 @@ def generate_code():
     for i in range(length):
         if 0 == i % 4 and append_blank and i > 0:  # do not add blank as the first digit
             f = f + blank
-        f = f + random.choice(range(1,20))
+        f = f + random.choice(common.DIGITS)
     return f
 
 
