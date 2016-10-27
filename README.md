@@ -5,7 +5,7 @@ An example showing how to get CTC cost function working with Tensorflow for ocr 
 ## Requirements
 
 - Python 2.7+
-- Tensorflow 0.8+
+- Tensorflow 0.10+
 - numpy
 - scipy
 
