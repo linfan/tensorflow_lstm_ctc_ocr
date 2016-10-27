@@ -66,7 +66,15 @@ def make_char_ims(output_height, font):
         draw.text((0, 0), c, (255, 255, 255), font=font)
         scale = float(output_height) / height
         im = im.resize((int(width * scale), output_height), Image.ANTIALIAS)
-        yield c, numpy.array(im)[:, :, 0].astype(numpy.float32) / 255.
+        char_array = numpy.array(im)[:, :, 0].astype(numpy.float32) / 255.
+        #print(char_array)
+        for idx in range(0, char_array.shape[0]):
+            for idy in range(0, char_array.shape[1]):
+                if char_array[idx][idy] >= 150.0/255.0:
+                    char_array[idx][idy] = 1
+                else:
+                    char_array[idx][idy] = 0
+        yield c, char_array
 
 
 def get_all_font_char_ims(out_height):
@@ -171,7 +179,7 @@ def generate_code():
     for i in range(length):
         if 0 == i % 4 and append_blank and i > 0:  # do not add blank as the first digit
             f = f + blank
-        f = f + random.choice(common.DIGITS)
+        f = f + random.choice(range(1,20))
     return f
 
 
@@ -255,7 +263,7 @@ def generate_im(char_ims, bg_ims):
         to_shape=bg.shape,
         min_scale=0.7,
         max_scale=0.9,
-        rotation_variation=0.15,
+        rotation_variation=0.20,
         scale_variation=1.0,
         translation_variation=1.0)
     plate = cv2.warpAffine(plate, M, (bg.shape[1], bg.shape[0]))
