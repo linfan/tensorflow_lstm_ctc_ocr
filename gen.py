@@ -201,7 +201,7 @@ def rounded_rect(shape, radius):
 def generate_plate(font_height, char_ims):
     h_padding = random.uniform(0, 0.4) * font_height
     v_padding = random.uniform(0, 0.3) * font_height
-    spacing = font_height * random.uniform(0.01, 0.05)
+    spacing = font_height * random.uniform(0.0, 0.05)
     radius = 1 + int(font_height * 0.1 * random.random())
     code = generate_code()
     text_width = sum(char_ims[c].shape[1] for c in code)
@@ -226,11 +226,11 @@ def generate_plate(font_height, char_ims):
     plate = (  # numpy.ones(out_shape) * plate_color * (1. - text_mask) +
         # numpy.ones(out_shape) *
         text_color * text_mask)
-
+    plate_resize = cv2.resize(plate, ((int)(random.uniform(0.8, 1.2)*plate.shape[1]), (int)(random.uniform(0.8, 1.2)*plate.shape[0])))
     # print "fffff", plate.shape
     # plate.resize([plate.shape[0] + 3, plate.shape[1]+1 ])
     # cv2.imwrite("test/fff.png", plate * 255)
-    return plate, rounded_rect(out_shape, radius), code  # means blank
+    return plate_resize, rounded_rect(out_shape, radius), code  # means blank
 
 
 def generate_bg(bg_ims):
@@ -269,7 +269,9 @@ def generate_im(char_ims, bg_ims):
     plate = cv2.warpAffine(plate, M, (bg.shape[1], bg.shape[0]))
     plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
     # plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
-
+    #plate_resize = cv2.resize(plate, ((int)(random.uniform(0.8, 1.2)*plate.shape[1]), (int)(random.uniform(0.8, 1.2)*plate.shape[0])))
+    
+    
     # out = plate * plate_mask + bg * (1 - plate_mask)
     out = plate + bg
     # out = plate
