@@ -34,7 +34,7 @@ import time
 SPACE_INDEX = 0
 FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
 
-SPACE_TOKEN = 'x'  # x means space
+SPACE_TOKEN = '<space>'
 
 __all__ = (
     'DIGITS',
@@ -49,26 +49,25 @@ DIGITS = "0123456789"
 
 
 CHARS = DIGITS
-# LENGTH = 16
-LENGTHS = [16, 19, 20]
-TEST_SIZE = 1000
-ADD_BLANK = True
+LENGTH = 16
+LENGTHS = [16, 20] # the number of digits varies from LENGTHS[0] to LENGTHS[1] in a image
+TEST_SIZE = 200
+ADD_BLANK = True   # if add a blank between digits
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
-BATCHES = 20000
-
+BATCHES = 10
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 500
+REPORT_STEPS = 100
 
 # Hyper-parameters
-num_epochs = 2000
+num_epochs = 200
 num_hidden = 64
 num_layers = 1
 
@@ -142,12 +141,12 @@ def unzip(b):
     ys = numpy.array(ys)
     return xs, ys
 
-# if __name__ == '__main__':
-#    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
-#    print train_inputs.shape
-#    print train_codes
-#    print("train_codes", train_codes)
-#    targets = np.asarray(train_codes).flat[:]
-#    print targets
-#    print list(read_data_for_lstm_ctc("test", 0, 10))
 
+if __name__ == '__main__':
+    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
+    print train_inputs.shape
+    print train_codes
+    print("train_codes", train_codes)
+    targets = np.asarray(train_codes).flat[:]
+    print targets
+    print list(read_data_for_lstm_ctc("test", 0, 10))
