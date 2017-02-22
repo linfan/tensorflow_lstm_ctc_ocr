@@ -2,7 +2,7 @@
 
 This is a demo using lstm and ctc to recognize a picture of  a series numbers with blanks all at once.
 
-For example:given the piture below the model would give result 73791096754314441539.
+For example:given the piture below the model would give result `73791096754314441539`.
 
 ![](https://raw.githubusercontent.com/synckey/tensorflow_lstm_ctc_ocr/20160731-save-the-model/00000007_73791096754314441539_1.png)
 
