@@ -1064,7 +1064,7 @@ def input_pipeline(filenames, batch_size, num_epochs=None):
     return example_batch, label_batch
 
 
-init_op = tf.initialize_all_variables()
+init_op = tf.global_variables_initializer()
 sess = tf.InteractiveSession()
 
 filename_queue = tf.train.string_input_producer(fnames)  # list of files to read

@@ -43,13 +43,11 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-import cPickle as pickle
-
 import common
 from common import OUTPUT_SHAPE
 
-fonts = [ "fonts/Arial.ttf", "fonts/times.ttf", "fonts/msyh.ttf"]
-# fonts = ["fonts/Farrington-7B-Qiqi.ttf","fonts/times.ttf"]
+fonts = ["fonts/Farrington-7B-Qiqi.ttf", "fonts/Arial.ttf", "fonts/times.ttf"]
+# fonts = ["fonts/times.ttf"]
 FONT_HEIGHT = 32  # Pixel size to which the chars are resized
 
 CHARS = common.CHARS + " "
@@ -66,15 +64,7 @@ def make_char_ims(output_height, font):
         draw.text((0, 0), c, (255, 255, 255), font=font)
         scale = float(output_height) / height
         im = im.resize((int(width * scale), output_height), Image.ANTIALIAS)
-        char_array = numpy.array(im)[:, :, 0].astype(numpy.float32) / 255.
-        #print(char_array)
-        for idx in range(0, char_array.shape[0]):
-            for idy in range(0, char_array.shape[1]):
-                if char_array[idx][idy] >= 150.0/255.0:
-                    char_array[idx][idy] = 1
-                else:
-                    char_array[idx][idy] = 0
-        yield c, char_array
+        yield c, numpy.array(im)[:, :, 0].astype(numpy.float32) / 255.
 
 
 def get_all_font_char_ims(out_height):
@@ -82,6 +72,7 @@ def get_all_font_char_ims(out_height):
     for font in fonts:
         result.append(dict(make_char_ims(out_height, font)))
     return result
+
 
 def euler_to_mat(yaw, pitch, roll):
     # Rotate clockwise about the Y-axis
@@ -107,14 +98,11 @@ def euler_to_mat(yaw, pitch, roll):
 
 def pick_colors():
     first = True
-    #return random.random(),random.random()
-    #while first or plate_color - text_color < 0.9:
-    while first:
-        text_color = random.uniform(0.4, 1)
-        #text_color = 1
+    while first or plate_color - text_color < 0.3:
+        text_color = random.random()
         plate_color = random.random()
-        #if text_color > plate_color:
-        #    text_color, plate_color = plate_color, text_color
+        if text_color > plate_color:
+            text_color, plate_color = plate_color, text_color
         first = False
     return text_color, plate_color
 
@@ -171,13 +159,13 @@ def make_affine_transform(from_shape, to_shape,
 def generate_code():
     f = ""
     append_blank = random.choice([True, False])
-    length = random.choice(range(1,21))
+    length = random.choice(common.LENGTHS)
     blank = ''
     if common.ADD_BLANK:
         blank = ' '
 
     for i in range(length):
-        if 0 == i % 4 and append_blank and i > 0:  # do not add blank as the first digit
+        if 0 == i % 4 and append_blank:
             f = f + blank
         f = f + random.choice(common.DIGITS)
     return f
@@ -199,9 +187,9 @@ def rounded_rect(shape, radius):
 
 
 def generate_plate(font_height, char_ims):
-    h_padding = random.uniform(0, 0.4) * font_height
-    v_padding = random.uniform(0, 0.3) * font_height
-    spacing = font_height * random.uniform(0.0, 0.05)
+    h_padding = random.uniform(0.2, 0.4) * font_height
+    v_padding = random.uniform(0.1, 0.3) * font_height
+    spacing = font_height * random.uniform(-0.01, 0.05)
     radius = 1 + int(font_height * 0.1 * random.random())
     code = generate_code()
     text_width = sum(char_ims[c].shape[1] for c in code)
@@ -210,9 +198,8 @@ def generate_plate(font_height, char_ims):
     out_shape = (int(font_height + v_padding * 2),
                  int(text_width + h_padding * 2))
 
-    #text_color, plate_color = pick_colors()
-    text_color = 1
-    
+    text_color, plate_color = pick_colors()
+
     text_mask = numpy.zeros(out_shape)
 
     x = h_padding
@@ -223,61 +210,49 @@ def generate_plate(font_height, char_ims):
         text_mask[iy:iy + char_im.shape[0], ix:ix + char_im.shape[1]] = char_im
         x += char_im.shape[1] + spacing
 
-    plate = (  # numpy.ones(out_shape) * plate_color * (1. - text_mask) +
-        # numpy.ones(out_shape) *
-        text_color * text_mask)
-    plate_resize = cv2.resize(plate, ((int)(random.uniform(0.8, 1.2)*plate.shape[1]), (int)(random.uniform(0.8, 1.2)*plate.shape[0])))
-    # print "fffff", plate.shape
-    # plate.resize([plate.shape[0] + 3, plate.shape[1]+1 ])
-    # cv2.imwrite("test/fff.png", plate * 255)
-    return plate_resize, rounded_rect(out_shape, radius), code  # means blank
+    plate = (numpy.ones(out_shape) * plate_color * (1. - text_mask) +
+             numpy.ones(out_shape) * text_color * text_mask)
+
+    return plate, rounded_rect(out_shape, radius), code.replace(" ", "")
 
 
-def generate_bg(bg_ims):
-    index = random.randint(0, len(bg_ims)-1)
-    bg = bg_ims[index]
+def generate_bg(num_bg_images):
+    found = False
+    while not found:
+        fname = "bgs/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
+        # fname = "bgs/12345678.jpg"
+        bg = cv2.imread(fname, cv2.IMREAD_GRAYSCALE) / 255.
+        if (bg.shape[1] >= OUTPUT_SHAPE[1] and
+                    bg.shape[0] >= OUTPUT_SHAPE[0]):
+            found = True
+
     x = random.randint(0, bg.shape[1] - OUTPUT_SHAPE[1])
     y = random.randint(0, bg.shape[0] - OUTPUT_SHAPE[0])
     bg = bg[y:y + OUTPUT_SHAPE[0], x:x + OUTPUT_SHAPE[1]]
 
     return bg
-    
-def get_all_bg_ims(num_bg_images):
-    result = []
-    for i in range(0, num_bg_images):
-        fname = "bgs/{:08d}.jpg".format(i)
-        bg = cv2.imread(fname, 0) / 255.
-        if (bg.shape[1] < OUTPUT_SHAPE[1] or
-                    bg.shape[0] < OUTPUT_SHAPE[0]):
-            continue;
-        result.append(bg)
-    return result
 
-def generate_im(char_ims, bg_ims):
-    bg = generate_bg(bg_ims)
+
+def generate_im(char_ims, num_bg_images):
+    bg = generate_bg(num_bg_images)
 
     plate, plate_mask, code = generate_plate(FONT_HEIGHT, char_ims)
 
     M, out_of_bounds = make_affine_transform(
         from_shape=plate.shape,
         to_shape=bg.shape,
-        min_scale=0.7,
+        min_scale=0.8,
         max_scale=0.9,
-        rotation_variation=0.20,
+        rotation_variation=0.3,
         scale_variation=1.0,
         translation_variation=1.0)
     plate = cv2.warpAffine(plate, M, (bg.shape[1], bg.shape[0]))
     plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
-    # plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
-    #plate_resize = cv2.resize(plate, ((int)(random.uniform(0.8, 1.2)*plate.shape[1]), (int)(random.uniform(0.8, 1.2)*plate.shape[0])))
-    
-    
-    # out = plate * plate_mask + bg * (1 - plate_mask)
-    out = plate + bg
-    # out = plate
+
+    out = plate * plate_mask + bg * (1 - plate_mask)
     out = cv2.resize(out, (OUTPUT_SHAPE[1], OUTPUT_SHAPE[0]))
 
-    # out += numpy.random.normal(scale=0.05, size=out.shape)
+    out += numpy.random.normal(scale=0.05, size=out.shape)
     out = numpy.clip(out, 0., 1.)
     return out, code, not out_of_bounds
 
@@ -293,27 +268,21 @@ def generate_ims(num_images):
         Iterable of number plate images.
 
     """
+    variation = 1.0
     char_ims = get_all_font_char_ims(FONT_HEIGHT)
-    num_bg_images = len(os.listdir("bgs")) - 2
-    bg_ims = get_all_bg_ims(num_bg_images)
+    num_bg_images = len(os.listdir("bgs"))
     for i in range(num_images):
-        yield generate_im(random.choice(char_ims), bg_ims)
+        yield generate_im(random.choice(char_ims), num_bg_images)
 
-#if __name__ == "__main__":
-def gen_all():
+
+if __name__ == "__main__":
     dirs = ["test", "train"]
     size = {"test": common.TEST_SIZE, "train": common.TRAIN_SIZE}
     for dir_name in dirs:
-	labels = {}
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
         im_gen = generate_ims(size.get(dir_name))
         for img_idx, (im, c, p) in enumerate(im_gen):
-            fname = dir_name + "/{:08d}_{}.png".format(img_idx, "1" if p else "0")
-            print '\'' + fname + '\','
+            fname = dir_name + "/{:08d}_{}_{}.png".format(img_idx, c, "1" if p else "0")
+            print '\''+fname+'\','
             cv2.imwrite(fname, im * 255.)
-            label_idx = "{:08d}".format(img_idx)
-            labels[label_idx] = c
-	label_file = open(dir_name + '_label.txt', 'w')
-	pickle.dump(labels, label_file)
-	label_file.close()	

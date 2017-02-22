@@ -46,10 +46,8 @@ from PIL import ImageFont
 import common
 from common import OUTPUT_SHAPE
 
-import cPickle as pickle
-
-#fonts = ["fonts/Farrington-7B-Qiqi.ttf", "fonts/Arial.ttf", "fonts/times.ttf"]
-fonts = ["fonts/times.ttf"]
+fonts = ["fonts/Farrington-7B-Qiqi.ttf", "fonts/Arial.ttf", "fonts/times.ttf"]
+# fonts = ["fonts/times.ttf"]
 FONT_HEIGHT = 32  # Pixel size to which the chars are resized
 
 CHARS = common.CHARS + " "
@@ -100,8 +98,7 @@ def euler_to_mat(yaw, pitch, roll):
 
 def pick_colors():
     first = True
-    return random.uniform(0.6,0.6),random.uniform(1.0,1.0)
-	#return random.random(),random.random()
+    return random.random(),random.random()
     while first or plate_color - text_color < 0.3:
         text_color = random.random()
         plate_color = random.random()
@@ -163,9 +160,7 @@ def make_affine_transform(from_shape, to_shape,
 def generate_code():
     f = ""
     append_blank = random.choice([True, False])
-	#append_blank = False
-    #length = random.choice(common.LENGTHS)
-    length = random.choice(range(10,20))
+    length = random.choice(common.LENGTHS)
     blank = ''
     if common.ADD_BLANK:
         blank = ' '
@@ -193,12 +188,9 @@ def rounded_rect(shape, radius):
 
 
 def generate_plate(font_height, char_ims):
-    h_padding = random.uniform(0.2, 0.2) * font_height
-    v_padding = random.uniform(0.1, 0.1) * font_height
-	#h_padding = 0.2*font_height
-	#v_padding = 0.1*font_height
-    spacing = font_height * random.uniform(0.01, 0.01)
-	#spacing = font_height * 0.02
+    h_padding = random.uniform(0.2, 0.4) * font_height
+    v_padding = random.uniform(0.1, 0.3) * font_height
+    spacing = font_height * random.uniform(0.01, 0.05)
     radius = 1 + int(font_height * 0.1 * random.random())
     code = generate_code()
     text_width = sum(char_ims[c].shape[1] for c in code)
@@ -226,7 +218,8 @@ def generate_plate(font_height, char_ims):
     # print "fffff", plate.shape
     # plate.resize([plate.shape[0] + 3, plate.shape[1]+1 ])
     # cv2.imwrite("test/fff.png", plate * 255)
-    return plate, rounded_rect(out_shape, radius), code  # means blank
+
+    return plate, rounded_rect(out_shape, radius), code.replace(" ", common.SPACE_TOKEN)  # means blank
 
 
 def generate_bg(num_bg_images):
@@ -234,7 +227,7 @@ def generate_bg(num_bg_images):
     while not found:
         fname = "bgs/{:08d}.jpg".format(random.randint(0, num_bg_images - 1))
         # fname = "bgs/12345678.jpg"
-        bg = cv2.imread(fname, 0) / 255.
+        bg = cv2.imread(fname, cv2.IMREAD_GRAYSCALE) / 255.
         if (bg.shape[1] >= OUTPUT_SHAPE[1] and
                     bg.shape[0] >= OUTPUT_SHAPE[0]):
             found = True
@@ -255,10 +248,10 @@ def generate_im(char_ims, num_bg_images):
         from_shape=plate.shape,
         to_shape=bg.shape,
         min_scale=0.8,
-        max_scale=0.8,
+        max_scale=0.9,
         rotation_variation=0,
-        scale_variation=0,
-        translation_variation=0)
+        scale_variation=1.0,
+        translation_variation=1.0)
     plate = cv2.warpAffine(plate, M, (bg.shape[1], bg.shape[0]))
     plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
     # plate_mask = cv2.warpAffine(plate_mask, M, (bg.shape[1], bg.shape[0]))
@@ -294,26 +287,10 @@ if __name__ == "__main__":
     dirs = ["test", "train"]
     size = {"test": common.TEST_SIZE, "train": common.TRAIN_SIZE}
     for dir_name in dirs:
-	labels = {}
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
         im_gen = generate_ims(size.get(dir_name))
         for img_idx, (im, c, p) in enumerate(im_gen):
-            fname = dir_name + "/{:08d}_{}.png".format(img_idx, "1" if p else "0")
+            fname = dir_name + "/{:08d}_{}_{}.png".format(img_idx, c, "1" if p else "0")
             print '\'' + fname + '\','
-            cv2.imwrite(fname, im*255.)
-            image = cv2.imread(fname)
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            for idx, line in enumerate(gray):
-                for idy, item in enumerate(line):
-                    if item > 127:
-                        gray[idx][idy] = 0
-                    else:
-                        gray[idx][idy] = 255
-            cv2.imwrite(fname, gray)
-            label_idx = "{:08d}".format(img_idx)
-            labels[label_idx] = c
-	label_file = open(dir_name + '_label.txt', 'w')
-	pickle.dump(labels, label_file)
-	label_file.close()	
-			
+            cv2.imwrite(fname, im * 255.)

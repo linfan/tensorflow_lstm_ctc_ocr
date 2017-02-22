@@ -28,14 +28,13 @@ import numpy
 import cv2
 import numpy as np
 
-import cPickle as pickle
 # Constants
 import time
 
-#SPACE_INDEX = 0
-#FIRST_INDEX = ord(' ') - 1 # 0 is reserved to space
+SPACE_INDEX = 0
+FIRST_INDEX = ord('0') - 1  # 0 is reserved to space
 
-#SPACE_TOKEN = 'x'  # x means space
+SPACE_TOKEN = '<space>'
 
 __all__ = (
     'DIGITS',
@@ -44,44 +43,38 @@ __all__ = (
 )
 
 OUTPUT_SHAPE = (64, 256)
-#DIGITS = "0123456789"
-#DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#DIGITS = "0123456789GHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-#DIGITS = "0123456789GHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,;'!@$%^&()[]{}-+=" #file name supported
-#DIGITS = "0123456789GHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`~!@#$%^&*()_+-=[];',./{}|:\"<>?\\" #all
-DIGITS = "0123456789GHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`~!@#$%&*()_+-=;',/:?" #url
+
+DIGITS = "0123456789"
 # LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 CHARS = DIGITS
-LENGTHS =[15,16,17,18]
-#LENGTHS = [16, 19, 20]
-TEST_SIZE = 100
-ADD_BLANK = False
+LENGTH = 16
+LENGTHS = [16, 20] # the number of digits varies from LENGTHS[0] to LENGTHS[1] in a image
+TEST_SIZE = 200
+ADD_BLANK = True   # if add a blank between digits
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
-BATCHES = 10000
-
+BATCHES = 10
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 
 MOMENTUM = 0.9
-REPORT_STEPS = 1000
+REPORT_STEPS = 100
 
 # Hyper-parameters
-num_epochs = 2000
-num_hidden = 256
+num_epochs = 200
+num_hidden = 64
 num_layers = 1
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
 # num_classes = ord('9') - ord('0') + 1 + 1 + 1
-num_classes = len(DIGITS)  + 1  # 10 digits + blank + ctc blank
-#num_classes = 62 + 1 + 1
+num_classes = len(DIGITS) + 1 + 1  # 10 digits + blank + ctc blank
 print num_classes
 
 
@@ -103,17 +96,14 @@ data_set = {}
 def load_data_set(dirname):
     fname_list = glob.glob(dirname + "/*.png")
     result = dict()
-    label_file = open(dirname + '_label.txt', 'r')
-    label_dict = pickle.load(label_file)
     for fname in sorted(fname_list):
         print "loading", fname
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
-        #code = list(fname.split("/")[1].split("_")[1])		
+        code = list(fname.split("/")[1].split("_")[1])
         index = fname.split("/")[1].split("_")[0]
-	code = label_dict[index]
         result[index] = (im, code)
     data_set[dirname] = result
-    label_file.close()
+
 
 def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
     start = time.time()
@@ -137,12 +127,12 @@ def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
         # im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         # code = list(fname.split("/")[1].split("_")[1])
         im, code = dir_data_set.get(fname)
-        yield im, numpy.asarray([DIGITS.find(x)  for x in list(code)])
+        yield im, numpy.asarray([SPACE_INDEX if x == SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in list(code)])
         # print("get time ", time.time() - start)
 
 
-#def convert_original_code_train_code(code):
-#    return numpy.asarray([SPACE_INDEX if x == SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in code])
+def convert_original_code_train_code(code):
+    return numpy.asarray([SPACE_INDEX if x == SPACE_TOKEN else (ord(x) - FIRST_INDEX) for x in code])
 
 
 def unzip(b):
@@ -151,12 +141,12 @@ def unzip(b):
     ys = numpy.array(ys)
     return xs, ys
 
-# if __name__ == '__main__':
-#    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
-#    print train_inputs.shape
-#    print train_codes
-#    print("train_codes", train_codes)
-#    targets = np.asarray(train_codes).flat[:]
-#    print targets
-#    print list(read_data_for_lstm_ctc("test", 0, 10))
 
+if __name__ == '__main__':
+    train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
+    print train_inputs.shape
+    print train_codes
+    print("train_codes", train_codes)
+    targets = np.asarray(train_codes).flat[:]
+    print targets
+    print list(read_data_for_lstm_ctc("test", 0, 10))
