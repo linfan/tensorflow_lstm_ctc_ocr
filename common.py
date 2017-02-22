@@ -50,16 +50,16 @@ DIGITS = "0123456789"
 
 CHARS = DIGITS
 LENGTH = 16
-LENGTHS = [5, 6]
+LENGTHS = [16, 20] # the number of digits varies from LENGTHS[0] to LENGTHS[1] in a image
 TEST_SIZE = 200
-ADD_BLANK = True
+ADD_BLANK = True   # if add a blank between digits
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 
 # parameters for bdlstm ctc
 BATCH_SIZE = 64
-BATCHES = 2000
+BATCHES = 10
 
 TRAIN_SIZE = BATCH_SIZE * BATCHES
 

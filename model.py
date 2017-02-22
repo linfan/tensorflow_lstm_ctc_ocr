@@ -23,10 +23,10 @@ def get_train_model():
     # Can be:
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
-    cell = tf.nn.rnn_cell.LSTMCell(common.num_hidden, state_is_tuple=True)
+    cell = tf.contrib.rnn.core_rnn_cell.LSTMCell(common.num_hidden, state_is_tuple=True)
 
     # Stacking rnn cells
-    stack = tf.nn.rnn_cell.MultiRNNCell([cell] * common.num_layers,
+    stack = tf.contrib.rnn.core_rnn_cell.MultiRNNCell([cell] * common.num_layers,
                                         state_is_tuple=True)
 
     # The second output is the last state and we will no use that

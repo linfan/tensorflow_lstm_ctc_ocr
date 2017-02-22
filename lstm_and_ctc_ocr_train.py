@@ -59,7 +59,7 @@ def train():
                                                staircase=True)
     logits, inputs, targets, seq_len, W, b = model.get_train_model()
 
-    loss = tf.contrib.ctc.ctc_loss(logits, targets, seq_len)
+    loss = tf.nn.ctc_loss( targets, logits, seq_len)
     cost = tf.reduce_mean(loss)
 
     optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,
@@ -67,13 +67,13 @@ def train():
 
     # Option 2: tf.contrib.ctc.ctc_beam_search_decoder
     # (it's slower but you'll get better results)
-    decoded, log_prob = tf.contrib.ctc.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
+    decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
 
     # Accuracy: label error rate
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), targets))
 
     # Initializate the weights and biases
-    init = tf.initialize_all_variables()
+    init = tf.global_variables_initializer()
 
     def do_report():
         test_feed = {inputs: test_inputs,
@@ -94,7 +94,7 @@ def train():
 
     with tf.Session() as session:
         session.run(init)
-        saver = tf.train.Saver(tf.all_variables(), max_to_keep=100)
+        saver = tf.train.Saver(tf.global_variables(), max_to_keep=100)
         for curr_epoch in xrange(num_epochs):
             # variables = tf.all_variables()
             # for i in variables:
