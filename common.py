@@ -97,7 +97,7 @@ def load_data_set(dirname):
     fname_list = glob.glob(dirname + "/*.png")
     result = dict()
     for fname in sorted(fname_list):
-        print("loading", fname)()
+        print("loading", fname)
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         code = list(fname.split("/")[1].split("_")[1])
         index = fname.split("/")[1].split("_")[0]
