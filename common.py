@@ -50,9 +50,9 @@ DIGITS = "0123456789"
 
 CHARS = DIGITS
 LENGTH = 16
-LENGTHS = [16, 20] # the number of digits varies from LENGTHS[0] to LENGTHS[1] in a image
+LENGTHS = [16, 20]  # the number of digits varies from LENGTHS[0] to LENGTHS[1] in a image
 TEST_SIZE = 200
-ADD_BLANK = True   # if add a blank between digits
+ADD_BLANK = True  # if add a blank between digits
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
@@ -108,7 +108,7 @@ def load_data_set(dirname):
 def read_data_for_lstm_ctc(dirname, start_index=None, end_index=None):
     start = time.time()
     fname_list = []
-    if not data_set.has_key(dirname):
+    if dirname not in data_set:
         load_data_set(dirname)
 
     if start_index is None:
