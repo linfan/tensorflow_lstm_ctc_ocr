@@ -77,8 +77,8 @@ def convolutional_layers():
 def get_train_model():
     # Has size [batch_size, max_stepsize, num_features], but the
     # batch_size and max_stepsize can vary along each step
-    #features = convolutional_layers()
-    #print features.get_shape()
+    # features = convolutional_layers()
+    # print features.get_shape()
     inputs = tf.placeholder(tf.float32, [None, None, common.OUTPUT_SHAPE[0]])
 
     # Here we use sparse_placeholder that will generate a
@@ -96,7 +96,7 @@ def get_train_model():
 
     # Stacking rnn cells
     stack = tf.contrib.rnn.core_rnn_cell.MultiRNNCell([cell] * common.num_layers,
-                                        state_is_tuple=True)
+                                                      state_is_tuple=True)
 
     # The second output is the last state and we will no use that
     outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)

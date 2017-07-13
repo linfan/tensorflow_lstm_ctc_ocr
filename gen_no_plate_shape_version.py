@@ -98,11 +98,11 @@ def euler_to_mat(yaw, pitch, roll):
 
 def pick_colors():
     first = True
-    return random.random(),random.random()
+    return random.random(), random.random()
     while first or plate_color - text_color < 0.3:
         text_color = random.random()
         plate_color = random.random()
-        #if text_color > plate_color:
+        # if text_color > plate_color:
         #    text_color, plate_color = plate_color, text_color
         first = False
     return text_color, plate_color
@@ -292,5 +292,5 @@ if __name__ == "__main__":
         im_gen = generate_ims(size.get(dir_name))
         for img_idx, (im, c, p) in enumerate(im_gen):
             fname = dir_name + "/{:08d}_{}_{}.png".format(img_idx, c, "1" if p else "0")
-            print '\'' + fname + '\','
+            print('\'' + fname + '\',')
             cv2.imwrite(fname, im * 255.)

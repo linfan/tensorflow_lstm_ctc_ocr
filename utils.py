@@ -63,7 +63,7 @@ def sparse_tuple_from(sequences, dtype=np.int32):
     values = []
 
     for n, seq in enumerate(sequences):
-        indices.extend(zip([n] * len(seq), xrange(len(seq))))
+        indices.extend(zip([n] * len(seq), range(len(seq))))
         values.extend(seq)
 
     indices = np.asarray(indices, dtype=np.int64)
@@ -75,13 +75,13 @@ def sparse_tuple_from(sequences, dtype=np.int32):
 
 # load the training or test dataset from disk
 def get_data_set(dirname, start_index=None, end_index=None):
-    #start = time.time()
+    # start = time.time()
     inputs, codes = common.unzip(list(common.read_data_for_lstm_ctc(dirname, start_index, end_index)))
-    #print("unzip time",time.time() - start )
+    # print("unzip time",time.time() - start )
     inputs = inputs.swapaxes(1, 2)
 
-    #print(dirname, ' inputs.shape', inputs.shape)
-    #print(dirname, " codes", codes)
+    # print(dirname, ' inputs.shape', inputs.shape)
+    # print(dirname, " codes", codes)
     targets = [np.asarray(i) for i in codes]
     # print("targets", targets)
     # print("train_inputs.shape[1]", train_inputs.shape[1])
@@ -101,9 +101,9 @@ def decode_a_seq(indexes, spars_tensor):
         str = common.DIGITS[spars_tensor[1][m]]
         decoded.append(str)
     # Replacing blank label to none
-    #str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
+    # str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
     # Replacing space label to space
-    #str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
+    # str_decoded = str_decoded.replace(chr(ord('0') - 1), ' ')
     # print("ffffffff", str_decoded)
     return decoded
 
@@ -124,8 +124,7 @@ def decode_sparse_tensor(sparse_tensor):
     print("decoded_indexes = ", decoded_indexes)
     result = []
     for index in decoded_indexes:
-        #print("index = ", index)
+        # print("index = ", index)
         result.append(decode_a_seq(index, sparse_tensor))
-	#print(result)
+    # print(result)
     return result
-

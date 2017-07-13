@@ -59,7 +59,7 @@ def train():
                                                staircase=True)
     logits, inputs, targets, seq_len, W, b = model.get_train_model()
 
-    loss = tf.nn.ctc_loss( targets, logits, seq_len)
+    loss = tf.nn.ctc_loss(targets, logits, seq_len)
     cost = tf.reduce_mean(loss)
 
     optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,
@@ -95,14 +95,14 @@ def train():
     with tf.Session() as session:
         session.run(init)
         saver = tf.train.Saver(tf.global_variables(), max_to_keep=100)
-        for curr_epoch in xrange(num_epochs):
+        for curr_epoch in range(num_epochs):
             # variables = tf.all_variables()
             # for i in variables:
             #     print(i.name)
 
             print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
-            for batch in xrange(common.BATCHES):
+            for batch in range(common.BATCHES):
                 start = time.time()
                 train_inputs, train_targets, train_seq_len = utils.get_data_set('train', batch * common.BATCH_SIZE,
                                                                                 (batch + 1) * common.BATCH_SIZE)
@@ -123,7 +123,8 @@ def train():
 
             val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
 
-            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}," \
+                  " val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
             print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler,
                              time.time() - start, lr))
 

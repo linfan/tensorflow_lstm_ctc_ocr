@@ -1096,7 +1096,7 @@ with sess.as_default():
 
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-print len(threads)
+print(len(threads))
 
 # filenames_queue = tf.train.string_input_producer(fnames)
 
@@ -1105,7 +1105,7 @@ try:
         a = []
         for i in range(len(fnames)):
             im, ll = read_my_file_format(filename_queue)
-            print i, ll
+            print(i, ll)
             a.append((im.eval(), ll))
             # Run training steps or whatever
             # sess.run()

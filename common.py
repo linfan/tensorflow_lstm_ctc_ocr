@@ -75,7 +75,7 @@ num_layers = 1
 # Accounting the 0th indice +  space + blank label = 28 characters
 # num_classes = ord('9') - ord('0') + 1 + 1 + 1
 num_classes = len(DIGITS) + 1 + 1  # 10 digits + blank + ctc blank
-print num_classes
+print(num_classes)
 
 
 def softmax(a):
@@ -97,7 +97,7 @@ def load_data_set(dirname):
     fname_list = glob.glob(dirname + "/*.png")
     result = dict()
     for fname in sorted(fname_list):
-        print "loading", fname
+        print("loading", fname)()
         im = cv2.imread(fname)[:, :, 0].astype(numpy.float32) / 255.
         code = list(fname.split("/")[1].split("_")[1])
         index = fname.split("/")[1].split("_")[0]
@@ -144,9 +144,9 @@ def unzip(b):
 
 if __name__ == '__main__':
     train_inputs, train_codes = unzip(list(read_data_for_lstm_ctc("test"))[:2])
-    print train_inputs.shape
-    print train_codes
+    print(train_inputs.shape)
+    print(train_codes)
     print("train_codes", train_codes)
     targets = np.asarray(train_codes).flat[:]
-    print targets
-    print list(read_data_for_lstm_ctc("test", 0, 10))
+    print(targets)
+    print(list(read_data_for_lstm_ctc("test", 0, 10)))
