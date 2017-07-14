@@ -98,8 +98,8 @@ def get_data_set(dirname, start_index=None, end_index=None):
 def decode_a_seq(indexes, spars_tensor):
     decoded = []
     for m in indexes:
-        str = common.DIGITS[spars_tensor[1][m]]
-        decoded.append(str)
+        str_seq = common.DIGITS[spars_tensor[1][m] - 1]
+        decoded.append(str_seq)
     # Replacing blank label to none
     # str_decoded = str_decoded.replace(chr(ord('9') + 1), '')
     # Replacing space label to space

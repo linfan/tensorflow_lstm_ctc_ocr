@@ -17,6 +17,8 @@ sh ./prepare_train_data.sh
 ```
 The `prepare_train_data.sh` script would download the [SUN database](http://vision.princeton.edu/projects/2010/SUN/SUN397.tar.gz) and extract the pitures to bgs dir. Then you can run `python gen.py` to generate test and train dir.
 
+`mkdir models` in rootdir to save ocr.model
+
 When the train and test data set are ready you can start the train process by `nohup python lstm_and_ctc_ocr_train.py `.
 
 ## Requirements
