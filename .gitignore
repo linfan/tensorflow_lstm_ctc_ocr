@@ -8,6 +8,7 @@ __pycache__/
 bgs/
 test/
 train/
+models/
 pip-log.txt
 *.tar.gz
 *.npz

@@ -20,7 +20,7 @@ def detect(test_inputs, test_targets, test_seq_len):
     saver = tf.train.Saver()
     with tf.Session() as sess:
         # Restore variables from disk.
-        saver.restore(sess, "models/ocr.model-0.95-94999")
+        saver.restore(sess, "models/ocr.model-100000")
         print("Model restored.")
         # feed_dict = {inputs: test_inputs, targets: test_targets, seq_len: test_seq_len}
         feed_dict = {inputs: test_inputs, seq_len: test_seq_len}
@@ -32,9 +32,9 @@ def detect(test_inputs, test_targets, test_seq_len):
         # print(detected_list)
         if len(original_list) != len(detected_list):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                  " test and detect length desn't match")
+                  " test and detect length doesn't match")
             return
-        print("T/F: original(length) <-------> detectcted(length)")
+        print("T/F: original(length) <-------> detected(length)")
         for idx, number in enumerate(original_list):
             detect_number = detected_list[idx]
             print(number, "(", len(number), ") <-------> ", detect_number, "(", len(detect_number), ")")
@@ -53,7 +53,7 @@ def detect(test_inputs, test_targets, test_seq_len):
 
 
 if __name__ == '__main__':
-    test_inputs, test_targets, test_seq_len = utils.get_data_set('small_test')
+    test_inputs, test_targets, test_seq_len = utils.get_data_set('test')
     print(test_inputs[0].shape)
     print(detect(test_inputs, test_targets, test_seq_len))
     # print_tensors_in_checkpoint_file("model/ocr.model.50", None)
