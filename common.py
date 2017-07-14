@@ -49,7 +49,6 @@ DIGITS = "0123456789"
 
 
 CHARS = DIGITS
-LENGTH = 16
 LENGTHS = [16, 20]  # the number of digits varies from LENGTHS[0] to LENGTHS[1] in a image
 TEST_SIZE = 200
 ADD_BLANK = True  # if add a blank between digits

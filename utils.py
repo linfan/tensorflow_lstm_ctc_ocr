@@ -2,12 +2,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import time
-from six.moves.urllib.request import urlretrieve
-
 import os
 import sys
+
 import numpy as np
+from six.moves.urllib.request import urlretrieve
 
 import common
 
@@ -50,6 +49,11 @@ def maybe_download(filename, expected_bytes, force=False):
             'Failed to verify ' + filename + \
             '. Can you get to it with a browser?')
     return filename
+
+
+def create_folder_if_not_exist(folder_name):
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
 
 
 def sparse_tuple_from(sequences, dtype=np.int32):
