@@ -16,8 +16,8 @@ from utils import decode_sparse_tensor
 
 # Some configs
 # Accounting the 0th indice +  space + blank label = 28 characters
-#num_classes = ord('9') - ord('0') + 1 + 1 + 1
-#print("num_classes", num_classes)
+# num_classes = ord('9') - ord('0') + 1 + 1 + 1
+# print("num_classes", num_classes)
 # Hyper-parameters
 num_epochs = 10000
 num_hidden = 64
@@ -61,7 +61,7 @@ def train():
                                                staircase=True)
     logits, inputs, targets, seq_len, W, b = model.get_train_model()
 
-    loss = tf.nn.ctc_loss( targets, logits, seq_len)
+    loss = tf.nn.ctc_loss(targets, logits, seq_len)
     cost = tf.reduce_mean(loss)
 
     optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,

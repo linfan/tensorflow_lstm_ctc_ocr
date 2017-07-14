@@ -22,7 +22,7 @@ def detect(test_inputs, test_targets, test_seq_len):
         # Restore variables from disk.
         saver.restore(sess, "models/ocr.model-0.5-56499")
         print("Model restored.")
-        #feed_dict = {inputs: test_inputs, targets: test_targets, seq_len: test_seq_len}
+        # feed_dict = {inputs: test_inputs, targets: test_targets, seq_len: test_seq_len}
         feed_dict = {inputs: test_inputs, seq_len: test_seq_len}
         dd = sess.run(decoded[0], feed_dict=feed_dict)
         return decode_sparse_tensor(dd)
@@ -32,4 +32,4 @@ if __name__ == '__main__':
     test_inputs, test_targets, test_seq_len = utils.get_data_set('test')
     print(test_inputs[0].shape)
     print(detect(test_inputs, test_targets, test_seq_len))
-   # print_tensors_in_checkpoint_file("model/ocr.model.50", None)
+    # print_tensors_in_checkpoint_file("model/ocr.model.50", None)

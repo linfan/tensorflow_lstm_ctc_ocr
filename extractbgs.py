@@ -27,11 +27,9 @@ Extract background images from a tar archive.
 
 """
 
-
 __all__ = (
     'extract_backgrounds',
 )
-
 
 import os
 import sys
@@ -66,18 +64,19 @@ def extract_backgrounds(archive_name):
         while m:
             yield m
             m = t.next()
+
     index = 0
     for m in members():
         if not m.name.endswith(".jpg"):
             continue
-        f =  t.extractfile(m)
+        f = t.extractfile(m)
         try:
             im = im_from_file(f)
         finally:
             f.close()
         if im is None:
             continue
-        
+
         if im.shape[0] > im.shape[1]:
             im = im[:im.shape[1], :]
         else:
@@ -93,6 +92,4 @@ def extract_backgrounds(archive_name):
 
 
 if __name__ == "__main__":
-
     extract_backgrounds(sys.argv[1])
-
