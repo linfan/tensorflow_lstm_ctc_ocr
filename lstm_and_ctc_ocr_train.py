@@ -75,6 +75,9 @@ def train():
     # Initializate the weights and biases
     init = tf.global_variables_initializer()
 
+    # Create folder to save models
+    utils.create_folder_if_not_exist('models')
+
     def do_report():
         test_feed = {inputs: test_inputs,
                      targets: test_targets,
