@@ -34,22 +34,22 @@ print("Data loaded....")
 def report_accuracy(decoded_list, test_targets):
     original_list = decode_sparse_tensor(test_targets)
     detected_list = decode_sparse_tensor(decoded_list)
-    true_numer = 0
+    true_number = 0
     # print(detected_list)
     if len(original_list) != len(detected_list):
         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-              " test and detect length desn't match")
+              " test and detect length doesn't match")
         return
-    print("T/F: original(length) <-------> detectcted(length)")
+    print("T/F: original(length) <-------> detected (length)")
     for idx, number in enumerate(original_list):
         detect_number = detected_list[idx]
         hit = (number == detect_number)
         print(hit, number, "(", len(number), ") <-------> ", detect_number, "(", len(detect_number), ")")
         if hit:
-            true_numer = true_numer + 1
-    accuraccy = true_numer * 1.0 / len(original_list)
-    print("Test Accuracy:", accuraccy)
-    return accuraccy
+            true_number = true_number + 1
+    accuracy = true_number * 1.0 / len(original_list)
+    print("Test Accuracy:", accuracy)
+    return accuracy
 
 
 def train():
